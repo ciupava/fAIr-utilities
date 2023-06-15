@@ -1,9 +1,9 @@
 # hot_fair_utilities ( Utilities for AI Assisted Mapping fAIr )
-Initially lib was developed during Open AI Challenge with [Omdeena](https://omdena.com/). Learn more about challenge from [here](https://www.hotosm.org/tech-blog/hot-tech-talk-open-ai-challenge/)  
+Initially lib was developed during Open AI Challenge with [Omdena](https://omdena.com/). Learn more about challenge from [here](https://www.hotosm.org/tech-blog/hot-tech-talk-open-ai-challenge/)  
 
 ## `hot_fair_utilities` Installation
 
-hot_fair_utilities is collection of utilities which contains core logic for model data prepration , training and postprocessing . It can support multiple models , Currently ramp is supported. 
+hot_fair_utilities is a collection of utilities which contains core logic for model data preparation, training and postprocessing. It can support multiple models, currently ramp is supported. 
 
 1. To get started clone this repo first : 
     ```

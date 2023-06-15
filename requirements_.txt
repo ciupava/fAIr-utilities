@@ -1,0 +1,18 @@
+
+mercantile == 1.2.1
+ramp-fair==0.1.2
+Shapely==1.8.0
+numpy
+gdal
+Pillow==9.0.1
+geopandas==0.10.2
+pandas==1.5.3
+rasterio 
+tqdm==4.62.3
+Rtree
+opencv-python==4.5.5.64
+bumpver
+black
+isort
+build
+twine
