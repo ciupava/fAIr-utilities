@@ -24,7 +24,7 @@ from tensorflow import keras
 # Note: this suppresses warning and other less urgent messages,
 # and only allows errors to be printed.
 # Comment this out if you are having mysterious problems, so you can see all messages.
-os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+# os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
 class RaiseError(Exception):

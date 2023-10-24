@@ -22,4 +22,5 @@ fairtrial/
 ramp-code/
 .ipynb_checkpoints
 ramp-data/
+model_ramp_baseline/
 
