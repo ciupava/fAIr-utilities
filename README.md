@@ -3,7 +3,7 @@ Initially lib was developed during Open AI Challenge with [Omdena](https://omden
 
 ## `hot_fair_utilities` Installation
 
-hot_fair_utilities is a collection of utilities which contains core logic for model data preparation, training and postprocessing. It can support multiple models, currently ramp is supported. 
+`hot_fair_utilities` is a collection of utilities which contains core logic for model data preparation, training and postprocessing. It can support multiple models, currently ramp is supported. 
 
 1. To get started clone this repo first : 
     ```
@@ -73,11 +73,20 @@ hot_fair_utilities is a collection of utilities which contains core logic for mo
 
 
 ## Conda Virtual Environment
-Create from env fle 
+Create from env file 
 
 ```
 conda env create -f environment.yml
 ```
+
+*NOTE* This environment in Mac lacks the integration of Tensorflow with the machine's GPU.\\
+You can add compatibility with Mac GPU (for Intel processor), by adding a few packages once activated the newly created environment (`fairgpu`). From command line:
+
+```
+SYSTEM_VERSION_COMPAT=0 pip install tensorflow-macos tensorflow-metal
+```
+
+
 Create your own
 
 ```

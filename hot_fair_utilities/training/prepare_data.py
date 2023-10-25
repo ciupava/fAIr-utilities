@@ -17,23 +17,25 @@ class RaiseError(Exception):
 def split_training_2_validation(input_path, output_path):
     """Converts training 2 validation
 
-    Currently supported for ramp , It converts training dataset provided by preprocessing script to validation datastes reuqired by ramp
+    Currently supported for ramp, It converts training dataset provided by preprocessing script to validation datasets required by ramp
     """
 
     RAMP_HOME = os.environ["RAMP_HOME"]
     PYTHON_HOME = os.environ.get("PYTHON_HOME")
+    pytvarrr = str(PYTHON_HOME)
     python_exec = "python"
     if PYTHON_HOME:
         python_exec = PYTHON_HOME
 
-    sys.path.append("..")
     os.chdir(Path(RAMP_HOME))
+    print('ramp home is ' +RAMP_HOME)
+    print('python home is ' + pytvarrr)
     # output current working directory.
 
     # Define the source and destination paths
     src_path = input_path
     dst_path = output_path
-
+    print("variables are: src " + src_path + "\n and dst:" + dst_path)
     # Check if the path exists
     if os.path.exists(dst_path):
         # Delete the directory and its contents
