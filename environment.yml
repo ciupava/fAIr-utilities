@@ -1,4 +1,4 @@
-name: fairtest
+name: fairgpu
 dependencies:
   - python>=3.7
   - geopandas
@@ -87,5 +87,7 @@ dependencies:
     - torch
     - torchvision
     - tensorflow
+    # - tensorflow-macos
+    # - tensorflow-metal
 # from the makefile
     - scikit-fmm
