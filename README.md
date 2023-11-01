@@ -1,5 +1,11 @@
 # hot_fair_utilities ( Utilities for AI Assisted Mapping fAIr )
-Initially lib was developed during Open AI Challenge with [Omdena](https://omdena.com/). Learn more about challenge from [here](https://www.hotosm.org/tech-blog/hot-tech-talk-open-ai-challenge/)  
+Initial lib was developed during Open AI Challenge with [Omdena](https://omdena.com/). Learn more about the challenge at [here](https://www.hotosm.org/tech-blog/hot-tech-talk-open-ai-challenge/)  
+
+## This repo
+This is a fork from the original (and on-going) [HOT](https://www.hotosm.org/) project, created with the aim to analyse its performance and to work on improving it.
+
+
+
 
 ## `hot_fair_utilities` Installation
 
