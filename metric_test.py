@@ -30,8 +30,8 @@ os.environ["SM_FRAMEWORK"] = "tf.keras"
 
 import ramp.utils # ??
 import hot_fair_utilities
-from hot_fair_utilities import preprocess, train, predict, polygonize
-
+from hot_fair_utilities import preprocess, predict, polygonize
+from hot_fair_utilities.training import train_metric
 
 # defining path variables
 # base_path = f"{os.getcwd()}/ramp-data/sample_2"
@@ -72,7 +72,7 @@ for city in cities_list:
 # from hot_fair_utilities import train
     print(f"\n---\n---\nStarting training on {city}\n")
     train_output = f"{city_path}/train" # !!! change name here
-    final_accuracy, final_model_path = train(  # !!! final model path has to be changed in the function
+    final_accuracy, final_model_path = train_metric(  # !!! final model path has to be changed in the function
         input_path=preprocess_output,
         output_path=train_output,
         epoch_size=2, # need to be able to change also the epoch size?
