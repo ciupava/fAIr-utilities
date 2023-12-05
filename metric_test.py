@@ -35,7 +35,7 @@ from hot_fair_utilities.training import train_metric
 
 # defining path variables
 # base_path = f"{os.getcwd()}/ramp-data/sample_2"
-base_path = "/Users/azanchetta/fAIr-utilities/ramp-data/test_data" # this path is used in all the rest of the code, so change accordingly
+base_path = "/Users/azanchetta/fAIr-utilities" # this path is used in all the rest of the code, so change accordingly
 # we should change this variable to be just the home variable, and use after another variable called "city_data" or similar
 # need:
 #   - a path for input city, preprocessed images will be saved here (city_data)
@@ -45,12 +45,14 @@ base_path = "/Users/azanchetta/fAIr-utilities/ramp-data/test_data" # this path i
 # naming should account for the (3?) variables against which we want to evaluate the model:
 # 
 # add duration (time) for each city in the for loop
+path_to_data = f"{base_path}/ramp_data/test_data"
+path_to_output = f"{base_path}/outputs"
 
 cities_list = ["1_Zanzibar", "2_Kampala"] # will be used to loop into, initially manually inputted, can become a text file
 
 for city in cities_list:
     print(f"Now working on {city} preprocess")
-    city_path = f"{base_path}/{city}" # make up string from base_path + city_name_from_list
+    city_path = f"{path_to_data}/{city}" # make up string from base_path + city_name_from_list
 
 
 ### Preprocessing
@@ -71,7 +73,7 @@ for city in cities_list:
 ### Training
 # from hot_fair_utilities import train
     print(f"\n---\n---\nStarting training on {city}\n")
-    train_output = f"{city_path}/train" # !!! change name here
+    train_output = f"{path_to_output}/{city_path}" # !!! change name here
     final_accuracy, final_model_path = train_metric(  # !!! final model path has to be changed in the function
         input_path=preprocess_output,
         output_path=train_output,
@@ -88,7 +90,7 @@ for city in cities_list:
 # 
 # from hot_fair_utilities import predict
     print(f"\n---\n---\nStarting prediction on {city}\n")
-    prediction_output = f"{city_path}/prediction/output"   # !!! change file name here
+    prediction_output = f"{path_to_output}/{city_path}/prediction"   # !!! change file name here
     predict(
         checkpoint_path=final_model_path,
         input_path=f"{city_path}/prediction/input", # the same of above?
