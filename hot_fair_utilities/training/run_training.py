@@ -336,3 +336,6 @@ def run_main_train_code(cfg):
         f"{cfg['graph_location']}/training_validation_sparse_categorical_accuracy.png"
     )
     print(f"Graph generated at : {cfg['graph_location']}")
+    print(f"accuracy {acc}")
+    print(f"accuracy {val_acc}")
+    print(f"loss {loss}")

@@ -45,7 +45,7 @@ base_path = "/Users/azanchetta/fAIr-utilities" # this path is used in all the re
 # naming should account for the (3?) variables against which we want to evaluate the model:
 # 
 # add duration (time) for each city in the for loop
-path_to_data = f"{base_path}/ramp_data/test_data"
+path_to_data = f"{base_path}/ramp-data/test_data"
 path_to_output = f"{base_path}/outputs"
 
 cities_list = ["1_Zanzibar", "2_Kampala"] # will be used to loop into, initially manually inputted, can become a text file
@@ -53,7 +53,6 @@ cities_list = ["1_Zanzibar", "2_Kampala"] # will be used to loop into, initially
 for city in cities_list:
     print(f"Now working on {city} preprocess")
     city_path = f"{path_to_data}/{city}" # make up string from base_path + city_name_from_list
-
 
 ### Preprocessing
 # Should run on a series of cities from the list above
@@ -73,7 +72,7 @@ for city in cities_list:
 ### Training
 # from hot_fair_utilities import train
     print(f"\n---\n---\nStarting training on {city}\n")
-    train_output = f"{path_to_output}/{city_path}" # !!! change name here
+    train_output = f"{path_to_output}/{city}" # !!! change name here
     final_accuracy, final_model_path = train_metric(  # !!! final model path has to be changed in the function
         input_path=preprocess_output,
         output_path=train_output,
@@ -90,7 +89,7 @@ for city in cities_list:
 # 
 # from hot_fair_utilities import predict
     print(f"\n---\n---\nStarting prediction on {city}\n")
-    prediction_output = f"{path_to_output}/{city_path}/prediction"   # !!! change file name here
+    prediction_output = f"{path_to_output}/{city}/prediction"   # !!! change file name here
     predict(
         checkpoint_path=final_model_path,
         input_path=f"{city_path}/prediction/input", # the same of above?
@@ -103,7 +102,7 @@ for city in cities_list:
     polygonize(
         input_path=prediction_output, 
         output_path=geojson_output,
-        remove_inputs = True,
+        remove_inputs = False,
     )
 
 ### Accuracy
