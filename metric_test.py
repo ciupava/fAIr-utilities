@@ -10,6 +10,7 @@ Created on Wed 22 Nov 2023
 
 ### Import modules, variables definition, initial checks
 import sys
+sys.path
 import tensorflow as tf
 print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('GPU')))
 
@@ -23,12 +24,12 @@ print(os.environ["RAMP_HOME"])
 # sys.path.append('../')
 sys.path.append('ramp-code/')
 
-import cv2
+# import cv2
 
 # initialise keras
 os.environ["SM_FRAMEWORK"] = "tf.keras"
 
-import ramp.utils # ??
+# import ramp.utils # ??
 import hot_fair_utilities
 from hot_fair_utilities import preprocess, predict, polygonize
 from hot_fair_utilities.training import train_metric
