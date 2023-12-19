@@ -2,11 +2,12 @@ name: fair38
 dependencies:
   - python==3.8
   - numpy==1.22.3
-  # - gdal
+  - gdal
   - pandas==1.4.1
   - setuptools
   # - solaris
   - pip==21.2.4
+  - gcc=12.1.0 
   - pip:
     # from colab
     - affine==2.3.1
@@ -54,7 +55,7 @@ dependencies:
     - munch==2.5.0
     - munkres==1.1.4
     - networkx==2.7.1
-    - opencv-python
+    - opencv-python==4.5.5.64
     - packaging==21.3
     - partd==1.2.0
     - Pillow==9.0.1
