@@ -36,7 +36,8 @@ from hot_fair_utilities.training import train_metric
 
 # defining path variables
 # base_path = f"{os.getcwd()}/ramp-data/sample_2"
-base_path = "/Users/azanchetta/fAIr-utilities" # this path is used in all the rest of the code, so change accordingly
+# base_path = "/Users/azanchetta/fAIr-utilities" # this path is used in all the rest of the code, so change accordingly
+base_path = f"{os.getcwd()}"
 # we should change this variable to be just the home variable, and use after another variable called "city_data" or similar
 # need:
 #   - a path for input city, preprocessed images will be saved here (city_data)
