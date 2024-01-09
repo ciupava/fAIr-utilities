@@ -1,4 +1,4 @@
-name: fair
+name: fair_orig
 channels:
   - conda-forge
   - defaults

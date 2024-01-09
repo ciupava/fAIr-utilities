@@ -6,6 +6,11 @@ This is a fork from the original (and on-going) [HOT](https://www.hotosm.org/) p
 
 The workflow and notes behind this project is in [this](https://hackmd.io/@annazan/H1PkFnRz6) HackMD (ask for access if needed).
 
+**Note:**
+- [ ] write about the `env` file
+- [ ] write about the metric generation
+
+
 ---
 
 ## `hot_fair_utilities` Installation
