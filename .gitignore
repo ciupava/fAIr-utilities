@@ -22,7 +22,7 @@ venv.bak/
 fairtrial/
 ramp-code/
 .ipynb_checkpoints
-ramp-data_/
+ramp-data/
 model_ramp_baseline/
 models_architectures
 outputs
