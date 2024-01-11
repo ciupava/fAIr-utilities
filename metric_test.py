@@ -34,10 +34,32 @@ import hot_fair_utilities
 from hot_fair_utilities import preprocess, predict, polygonize
 from hot_fair_utilities.training import train_metric
 
-# defining path variables
+### defining path variables
 # base_path = f"{os.getcwd()}/ramp-data/sample_2"
 # base_path = "/Users/azanchetta/fAIr-utilities" # this path is used in all the rest of the code, so change accordingly
 base_path = f"{os.getcwd()}"
+print(f"\n**\n** Current working directory {base_path}")
+
+### generating list of regions (cities) from the input txt file
+# input text file from command line:
+# list_filename = "cities_list.txt"
+list_filename = sys.argv[1]
+###### add condition of stopping if filename empty or file doesn't exist
+print(f"\n** ---\n** I am going to get the names from {list_filename} (name of the file you provided)")
+# with open("cities_list.txt", "r") as file:
+#     cities_list = "".join(file.read().split("\n"))
+with open(list_filename, 'r') as f:
+    full_file = f.read()
+    print(full_file)
+    full_list = full_file.split('\n') #literal_eval(name)
+    cities_list = []
+    for counter in range(len(full_list)):
+        line = full_list[counter]
+        print(f"line is {line}")
+        if not line.startswith('#'): # this is to avoid commented lines in the input file
+            cities_list.append(full_list[counter])
+print(f"\n**\n** List of cities {cities_list}")
+
 # we should change this variable to be just the home variable, and use after another variable called "city_data" or similar
 # need:
 #   - a path for input city, preprocessed images will be saved here (city_data)
@@ -47,10 +69,13 @@ base_path = f"{os.getcwd()}"
 # naming should account for the (3?) variables against which we want to evaluate the model:
 # 
 # add duration (time) for each city in the for loop
-path_to_data = f"{base_path}/ramp-data/test_data"
+path_to_data = f"{base_path}/ramp-data"
 path_to_output = f"{base_path}/outputs"
 
-cities_list = ["1_Zanzibar", "2_Kampala"] # will be used to loop into, initially manually inputted, can become a text file
+# cities_list = ["1_Zanzibar", "2_Kampala"] # will be used to loop into, initially manually inputted, can become a text file
+
+# with open("cities_list.txt", "r") as file:
+#     cities_list = "".join(file.read().split("\n"))
 
 for city in cities_list:
     print(f"Now working on {city} preprocess")
@@ -85,7 +110,7 @@ for city in cities_list:
     )
 
     print(f"Final accuracy: {final_accuracy} and final model path: {final_model_path}")
-
+    # store this output somewhere!!
 
 ### Prediction
 # 
