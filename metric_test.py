@@ -17,7 +17,7 @@ print("Num GPUs Available: ", len(tf.config.experimental.list_physical_devices('
 import os
 print(os.getcwd())
 os.environ.update(os.environ)
-        # Add a new environment variable to the operating system
+# Add a new environment variable to the operating system
 os.environ["RAMP_HOME"] = os.getcwd()
 # Print the environment variables to verify that the new variable was added
 print(os.environ["RAMP_HOME"])
@@ -44,18 +44,19 @@ print(f"\n**\n** Current working directory {base_path}")
 # input text file from command line:
 # list_filename = "cities_list.txt"
 list_filename = sys.argv[1]
-###### add condition of stopping if filename empty or file doesn't exist
+#TO_DO: add condition of stopping if filename empty or file doesn't exist
 print(f"\n** ---\n** I am going to get the names from {list_filename} (name of the file you provided)")
 # with open("cities_list.txt", "r") as file:
 #     cities_list = "".join(file.read().split("\n"))
+# the following is to obtain the list of cities, removing commented lines (starting with "#"):
 with open(list_filename, 'r') as f:
     full_file = f.read()
-    print(full_file)
-    full_list = full_file.split('\n') #literal_eval(name)
+    # print(full_file)
+    full_list = full_file.split('\n') # separating per each new line
     cities_list = []
     for counter in range(len(full_list)):
         line = full_list[counter]
-        print(f"line is {line}")
+        # print(f"line is {line}")
         if not line.startswith('#'): # this is to avoid commented lines in the input file
             cities_list.append(full_list[counter])
 print(f"\n**\n** List of cities {cities_list}")
@@ -73,10 +74,8 @@ path_to_data = f"{base_path}/ramp-data"
 path_to_output = f"{base_path}/outputs"
 
 # cities_list = ["1_Zanzibar", "2_Kampala"] # will be used to loop into, initially manually inputted, can become a text file
-
 # with open("cities_list.txt", "r") as file:
 #     cities_list = "".join(file.read().split("\n"))
-
 for city in cities_list:
     print(f"Now working on {city} preprocess")
     city_path = f"{path_to_data}/{city}" # make up string from base_path + city_name_from_list

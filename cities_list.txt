@@ -1,3 +1,4 @@
 # write a name per line, corresponding to the name of the folder where files are stored
-1_Zanzibar
-2_Kampala
+#1_Zanzibar
+#2_Kampala
+4_Salvacion
