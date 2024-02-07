@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+# python3 metric_test.py cities_list.txt
+
 """
-Testing process to perform a metric on measurement of fAIr's performance.
+Testing process to generate a metric to measure fAIr's performance.
 
 Created on Wed 22 Nov 2023
 
@@ -70,30 +73,31 @@ print(f"\n**\n** List of cities {cities_list}")
 # naming should account for the (3?) variables against which we want to evaluate the model:
 # 
 # add duration (time) for each city in the for loop
-path_to_data = f"{base_path}/ramp-data"
+path_to_data = f"{base_path}/ramp-data/metric_data"
 path_to_output = f"{base_path}/outputs"
 
 # cities_list = ["1_Zanzibar", "2_Kampala"] # will be used to loop into, initially manually inputted, can become a text file
 # with open("cities_list.txt", "r") as file:
 #     cities_list = "".join(file.read().split("\n"))
 for city in cities_list:
-    print(f"Now working on {city} preprocess")
+    # print(f"Now working on {city} preprocess")
     city_path = f"{path_to_data}/{city}" # make up string from base_path + city_name_from_list
 
-### Preprocessing
-# Should run on a series of cities from the list above
-# the preprocessing shouldn't run if images have already been preprocessed
-# from hot_fair_utilities import preprocess  # should all the imports be put at beginning?
+# ### Preprocessing
+# # Should run on a series of cities from the list above
+# # the preprocessing shouldn't run if images have already been preprocessed
+# # from hot_fair_utilities import preprocess  # should all the imports be put at beginning?
 
-    model_input_image_path = f"{city_path}/input" # !!! change name here
-    preprocess_output=f"{city_path}/preprocessed" # !!! change name here
-    preprocess(
-                input_path = model_input_image_path,
-                output_path = preprocess_output,
-                rasterize=True,
-                rasterize_options=["binary"],
-                georeference_images=True,
-            )
+#     model_input_image_path = f"{city_path}/input" # !!! change name here
+#     preprocess_output=f"{city_path}/preprocessed" # !!! change name here
+    preprocess_output=f"{city_path}"
+#     preprocess(
+#                 input_path = model_input_image_path,
+#                 output_path = preprocess_output,
+#                 rasterize=True,
+#                 rasterize_options=["binary"],
+#                 georeference_images=True,
+#             )
 
 ### Training
 # from hot_fair_utilities import train
