@@ -42,16 +42,18 @@ def predict(
         )
     """
     start = time.time()
-    print(f"Using : {checkpoint_path}")
+    print(f"Using: {checkpoint_path}")
     model = keras.models.load_model(checkpoint_path)
     print(f"It took {round(time.time()-start)} sec to load model")
     start = time.time()
 
     os.makedirs(prediction_path, exist_ok=True)
-    image_paths = glob(f"{input_path}/*.png")
-
+    print(f'prediction path {prediction_path}')
+    image_paths = glob(f"{input_path}/*.tif")
+    print(f'image path{image_paths}')
     for i in range((len(image_paths) + BATCH_SIZE - 1) // BATCH_SIZE):
         image_batch = image_paths[BATCH_SIZE * i : BATCH_SIZE * (i + 1)]
+        print(f'image batch {image_batch}')
         images = open_images(image_batch)
         images = images.reshape(-1, IMAGE_SIZE, IMAGE_SIZE, 3)
 
