@@ -43,6 +43,11 @@ from hot_fair_utilities.training import train_metric
 base_path = f"{os.getcwd()}"
 print(f"\n**\n** Current working directory {base_path}")
 
+# defining other parameters: (or obtain from config file and loop into these?)
+n_of_epochs = 2
+n_of_batches = 2
+print(f'Number of epochs {n_of_epochs} and batch size {n_of_batches}')
+
 ### generating list of regions (cities) from the input txt file
 # input text file from command line:
 # list_filename = "cities_list.txt"
@@ -106,20 +111,23 @@ for city in cities_list:
     final_accuracy, final_model_path = train_metric(  # !!! final model path has to be changed in the function
         input_path=preprocess_output,
         output_path=train_output,
-        epoch_size=2, # need to be able to change also the epoch size?
-        batch_size=2, # need to be able to change also the batch size?
+        epoch_size=n_of_epochs, # need to be able to change also the epoch size?
+        batch_size=n_of_batches, # need to be able to change also the batch size?
         model="ramp",
         model_home=os.environ["RAMP_HOME"]
     )
 
     print(f"Final accuracy: {final_accuracy} and final model path: {final_model_path}")
     # store this output somewhere!!
+    accuracy_filename = f'{city}_{n_of_batches}b_{n_of_epochs}e'
+    accuracy_file_path = f'{path_to_output}/accuracies/{city}_{n_of_epochs}_{n_of_batches}'
 
 ### Prediction
 # 
 # from hot_fair_utilities import predict
     print(f"\n---\n---\nStarting prediction on {city}\n")
-    prediction_output = f"{path_to_output}/{city}/prediction"   # !!! change file name here
+    # prediction_output = f"{path_to_output}/{city}/prediction"   # !!! change file name here
+    prediction_output = "" #### NAME PATH HERE!!!!!!!!!!!!!!!!!!
     predict(
         checkpoint_path=final_model_path,
         input_path=f"{city_path}/prediction/input", # the same of above?
