@@ -119,8 +119,11 @@ for city in cities_list:
 
     print(f"Final accuracy: {final_accuracy} and final model path: {final_model_path}")
     # store this output somewhere!!
-    accuracy_filename = f'{city}_{n_of_batches}b_{n_of_epochs}e'
-    accuracy_file_path = f'{path_to_output}/accuracies/{city}_{n_of_epochs}_{n_of_batches}'
+    accuracy_filename = f'{city}_{n_of_batches}b_{n_of_epochs}e.EXTENSION??'
+    accuracy_file_path = f'{path_to_output}/accuracies/{accuracy_filename}'
+
+#### ------ Training metrics
+
 
 ### Prediction
 # 
@@ -134,14 +137,14 @@ for city in cities_list:
         prediction_path=prediction_output,
     )
 
-# from hot_fair_utilities import polygonize
-    print(f"\n---\n---\nStarting polygonise result on {city}\n")
-    geojson_output= f"{prediction_output}/prediction.geojson"
-    polygonize(
-        input_path=prediction_output, 
-        output_path=geojson_output,
-        remove_inputs = False,
-    )
+#### ------ Prediction metrics
 
-### Accuracy
-# Add IoU here
+# # from hot_fair_utilities import polygonize
+#     print(f"\n---\n---\nStarting polygonise result on {city}\n")
+#     geojson_output= f"{prediction_output}/prediction.geojson"
+#     polygonize(
+#         input_path=prediction_output, 
+#         output_path=geojson_output,
+#         remove_inputs = False,
+#     )
+

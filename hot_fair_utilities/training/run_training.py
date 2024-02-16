@@ -125,7 +125,6 @@ def run_main_train_code(cfg):
     # specify a function that will construct the loss function
     get_loss_fn_name = cfg["loss"]["get_loss_fn_name"]
     get_loss_fn = getattr(loss_constructors, get_loss_fn_name)
-
     # Construct the loss function
     loss_fn = get_loss_fn(cfg)
 
@@ -133,7 +132,7 @@ def run_main_train_code(cfg):
     if cfg["metrics"]["use_metrics"]:
         get_metrics_fn_names = cfg["metrics"]["get_metrics_fn_names"]
         get_metrics_fn_parms = cfg["metrics"]["metrics_fn_parms"]
-
+        assert len(get_metrics_fn_names) == len(get_metrics_fn_parms)
         for get_mf_name, mf_parms in zip(get_metrics_fn_names, get_metrics_fn_parms):
             get_metric_fn = getattr(metric_constructors, get_mf_name)
             print(f"Metric constructor function: {get_metric_fn.__name__}")
@@ -164,6 +163,9 @@ def run_main_train_code(cfg):
                 # print("Setting previous model layers traininable : False")
 
         if not cfg["saved_model"]["save_optimizer_state"]:
+            print("-------")
+            print(the_metrics)
+            print("-------")
             # If you don't want to save the original state of training, recompile the model.
             the_model.compile(optimizer=optimizer, loss=loss_fn, metrics=[the_metrics])
 
@@ -309,6 +311,9 @@ def run_main_train_code(cfg):
     )
     end = perf_counter()
     print(f"Training Finished , Time taken to train : {end-start} seconds")
+    print('\n-----\nHistory:')
+    print(history.history.keys())
+    print('\n-----')
 
     # plot the training and validation accuracy and loss at each epoch
     print("Generating graphs ....")

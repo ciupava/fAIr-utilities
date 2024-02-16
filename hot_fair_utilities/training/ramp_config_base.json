@@ -47,7 +47,7 @@
     },
     "metrics":{
         "use_metrics":true,
-        "get_metrics_fn_names":["get_recall_fn"],
+        "get_metrics_fn_names":["get_sparse_categorical_accuracy_fn"],
         "metrics_fn_parms":[{}]
     },
     "optimizer":{
