@@ -3,6 +3,7 @@ import os
 
 # Third party imports
 import tensorflow as tf
+from tensorflow.keras.metrics import Precision
 
 # Assert that the version of the library is greater than or equal to 2.9.2
 assert tf.__version__ <= "2.9.2"  # tested up to 2.9.2
@@ -15,6 +16,7 @@ import json
 import os
 from pathlib import Path
 from time import perf_counter
+import pandas as pd
 
 # Third party imports
 import tensorflow as tf
@@ -164,11 +166,21 @@ def run_main_train_code(cfg):
 
         if not cfg["saved_model"]["save_optimizer_state"]:
             print("-------")
-            print(the_metrics)
+            print(f'-------{the_metrics}')
             print("-------")
+            
+            # For class 0
+            precision_class_0 = Precision(class_id=0)
+            # For class 1
+            precision_class_1 = Precision(class_id=1)
+            metrics=[precision_class_0,precision_class_1]
+            print(f'-------{the_metrics}')
+            print("-------")
+            
             # If you don't want to save the original state of training, recompile the model.
             the_model.compile(optimizer=optimizer, loss=loss_fn, metrics=[the_metrics])
-
+            # the_model.compile(optimizer=optimizer, loss=loss_fn, metrics=[precision_class_0,precision_class_1])
+            
             # the_model.compile(optimizer = optimizer,
             #    loss=loss_fn,
             #    metrics = [get_iou_coef_fn])
@@ -233,13 +245,20 @@ def run_main_train_code(cfg):
         )
 
     assert train_batches is not None, "training batches were not constructed"
-
+    print(f"-------\n* train img dir{train_img_dir}\n* train mask dir{train_mask_dir}")
+    print(f"* input img shape{input_img_shape}\n* output img shape{output_img_shape}")
+    
+    print(train_batches)
+    
     val_batches = test_batches_from_gtiff_dirs(
         val_img_dir, val_mask_dir, batch_size, input_img_shape, output_img_shape
     )
 
     assert val_batches is not None, "validation batches were not constructed"
-
+    print(f"-------\n* val img dir{val_img_dir}\n* val mask dir{val_mask_dir}\n-------")
+    print(val_batches)
+    print('*\n*\n')
+    
     ## Callbacks ##
     callbacks_list = []
 

@@ -78,7 +78,8 @@ print(f"\n**\n** List of cities {cities_list}")
 # naming should account for the (3?) variables against which we want to evaluate the model:
 # 
 # add duration (time) for each city in the for loop
-path_to_data = f"{base_path}/ramp-data/metric_data"
+# path_to_data = f"{base_path}/ramp-data" # for ramp data path
+path_to_data = f"{base_path}/ramp-data/metric_data" # for metric data path
 path_to_output = f"{base_path}/outputs"
 
 # cities_list = ["1_Zanzibar", "2_Kampala"] # will be used to loop into, initially manually inputted, can become a text file
