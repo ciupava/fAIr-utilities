@@ -3,7 +3,6 @@ import os
 
 # Third party imports
 import tensorflow as tf
-from tensorflow.keras.metrics import Precision
 
 # Assert that the version of the library is greater than or equal to 2.9.2
 assert tf.__version__ <= "2.9.2"  # tested up to 2.9.2
@@ -166,14 +165,6 @@ def run_main_train_code(cfg):
 
         if not cfg["saved_model"]["save_optimizer_state"]:
             print("-------")
-            print(f'-------{the_metrics}')
-            print("-------")
-            
-            # For class 0
-            precision_class_0 = Precision(class_id=0)
-            # For class 1
-            precision_class_1 = Precision(class_id=1)
-            metrics=[precision_class_0,precision_class_1]
             print(f'-------{the_metrics}')
             print("-------")
             
