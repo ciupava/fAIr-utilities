@@ -150,21 +150,23 @@ def split_training_2_validation_2_prediction(input_path, output_path):
     copytree(src_path, dst_path)
 
     # Define the script as a string
-    # SPLIT INTO TRAINING AND VALIDATION
-    # script = f"""%run ramp-code/scripts/make_train_val_split_lists.py -src {dst_path}/chips -pfx {uid}_fair_split -trn 0.85 -val 0.15"""
+    # SPLIT INTO TRAINING, VALIDATION AND PREDICTION
+    # script = f"""%run ramp-code/scripts/make_train_val_pred_split_lists.py -src {dst_path}/chips -pfx {uid}_fair_split -trn 0.70 -val 0.15 - prd 0.15"""
     try:
         subprocess.check_output(
             [
                 python_exec,
-                f"{RAMP_HOME}/ramp-code/scripts/make_train_val_split_lists.py",
+                f"{RAMP_HOME}/ramp-code/scripts/make_train_val_pred_split_lists.py",
                 "-src",
                 f"{dst_path}/chips",
                 "-pfx",
                 f"{dst_path}/fair_split",
                 "-trn",
-                "0.85",
+                "0.70",
                 "-val",
                 "0.15",
+                "-prd",
+                "0.15"
             ],
             env=os.environ,
         )
@@ -219,6 +221,61 @@ def split_training_2_validation_2_prediction(input_path, output_path):
                 f"{dst_path}/val-binarymasks",
                 "-csv",
                 f"{dst_path}/fair_split_val.csv",
+                "-mv",
+            ],
+            env=os.environ,
+        )
+    except subprocess.CalledProcessError as ex:
+        raise ex
+
+    # move all the PREDICTION chips, labels and masks to their new locations
+    try:
+        subprocess.check_output(
+            [
+                python_exec,
+                f"{RAMP_HOME}/ramp-code/scripts/move_chips_from_csv.py",
+                "-sd",
+                f"{dst_path}/chips",
+                "-td",
+                f"{dst_path}/pred-chips",
+                "-csv",
+                f"{dst_path}/fair_split_pred.csv",
+                "-mv",
+            ],
+            env=os.environ,
+        )
+    except subprocess.CalledProcessError as ex:
+        raise ex
+
+    try:
+        subprocess.check_output(
+            [
+                python_exec,
+                f"{RAMP_HOME}/ramp-code/scripts/move_chips_from_csv.py",
+                "-sd",
+                f"{dst_path}/labels",
+                "-td",
+                f"{dst_path}/pred-labels",
+                "-csv",
+                f"{dst_path}/fair_split_pred.csv",
+                "-mv",
+            ],
+            env=os.environ,
+        )
+    except subprocess.CalledProcessError as ex:
+        raise ex
+
+    try:
+        subprocess.check_output(
+            [
+                python_exec,
+                f"{RAMP_HOME}/ramp-code/scripts/move_chips_from_csv.py",
+                "-sd",
+                f"{dst_path}/binarymasks",
+                "-td",
+                f"{dst_path}/pred-binarymasks",
+                "-csv",
+                f"{dst_path}/fair_split_pred.csv",
                 "-mv",
             ],
             env=os.environ,
