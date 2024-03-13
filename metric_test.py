@@ -27,12 +27,17 @@ print(os.environ["RAMP_HOME"])
 # sys.path.append('../')
 sys.path.append('ramp-code/')
 
+import datetime
+
 # import cv2
 
 # initialise keras
 os.environ["SM_FRAMEWORK"] = "tf.keras"
 
-# import ramp.utils # ??
+# ramp specific
+import ramp
+
+# fair_utilities specific
 import hot_fair_utilities
 from hot_fair_utilities import preprocess, predict, polygonize
 from hot_fair_utilities.training import train_metric
@@ -79,8 +84,10 @@ print(f"\n**\n** List of cities {cities_list}")
 # 
 # add duration (time) for each city in the for loop
 # path_to_data = f"{base_path}/ramp-data" # for ramp data path
-path_to_data = f"{base_path}/ramp-data/metric_data" # for metric data path
-path_to_output = f"{base_path}/outputs"
+path_to_data = f'{base_path}/ramp-data/metric_data' # for metric data path
+path_to_output = f'{base_path}/outputs'
+preprocess_output = ''
+train_output = ''
 
 # cities_list = ["1_Zanzibar", "2_Kampala"] # will be used to loop into, initially manually inputted, can become a text file
 # with open("cities_list.txt", "r") as file:
@@ -90,53 +97,66 @@ for city in cities_list:
     city_path = f"{path_to_data}/{city}" # make up string from base_path + city_name_from_list
 
 # ### Preprocessing
-# # Should run on a series of cities from the list above
-# # the preprocessing shouldn't run if images have already been preprocessed
-# # from hot_fair_utilities import preprocess  # should all the imports be put at beginning?
+#  Preprocessing is skipped as the images are already preprocessed.
 
-#     model_input_image_path = f"{city_path}/input" # !!! change name here
-#     preprocess_output=f"{city_path}/preprocessed" # !!! change name here
-    preprocess_output=f"{city_path}"
-#     preprocess(
-#                 input_path = model_input_image_path,
-#                 output_path = preprocess_output,
-#                 rasterize=True,
-#                 rasterize_options=["binary"],
-#                 georeference_images=True,
-#             )
+### Prepare data and environment for training
+## Split training dataset to: training, validation, prediction sets
+    from hot_fair_utilities.training.prepare_data import split_training_2_validation_2_prediction
+    x = split_training_2_validation_2_prediction(preprocess_output, train_output)
+
+## Import ramp model constructors
+    from ramp.training import (
+        callback_constructors,
+        loss_constructors,
+        metric_constructors,
+        model_constructors,
+        optimizer_constructors,
+    )
+
+## Import config file
+    from hot_fair_utilities.training.run_training import manage_fine_tuning_config
+    print('config file name:')
+
+output_path=train_output
+epoch_size=2
+batch_size=2
+freeze_layers=False
+cfg = manage_fine_tuning_config(
+            output_path, epoch_size, batch_size, freeze_layers
+        )
 
 ### Training
 # from hot_fair_utilities import train
     print(f"\n---\n---\nStarting training on {city}\n")
     train_output = f"{path_to_output}/{city}" # !!! change name here
-    final_accuracy, final_model_path = train_metric(  # !!! final model path has to be changed in the function
-        input_path=preprocess_output,
-        output_path=train_output,
-        epoch_size=n_of_epochs, # need to be able to change also the epoch size?
-        batch_size=n_of_batches, # need to be able to change also the batch size?
-        model="ramp",
-        model_home=os.environ["RAMP_HOME"]
-    )
+    # final_accuracy, final_model_path = train_metric(  # !!! final model path has to be changed in the function
+    #     input_path=preprocess_output,
+    #     output_path=train_output,
+    #     epoch_size=n_of_epochs, # need to be able to change also the epoch size?
+    #     batch_size=n_of_batches, # need to be able to change also the batch size?
+    #     model="ramp",
+    #     model_home=os.environ["RAMP_HOME"]
+    # )
 
-    print(f"Final accuracy: {final_accuracy} and final model path: {final_model_path}")
+    # print(f"Final accuracy: {final_accuracy} and final model path: {final_model_path}")
     # store this output somewhere!!
     accuracy_filename = f'{city}_{n_of_batches}b_{n_of_epochs}e.EXTENSION??'
     accuracy_file_path = f'{path_to_output}/accuracies/{accuracy_filename}'
 
 #### ------ Training metrics
 
-
-### Prediction
-# 
-# from hot_fair_utilities import predict
-    print(f"\n---\n---\nStarting prediction on {city}\n")
-    # prediction_output = f"{path_to_output}/{city}/prediction"   # !!! change file name here
-    prediction_output = "" #### NAME PATH HERE!!!!!!!!!!!!!!!!!!
-    predict(
-        checkpoint_path=final_model_path,
-        input_path=f"{city_path}/prediction/input", # the same of above?
-        prediction_path=prediction_output,
-    )
+# ### Prediction
+#  will be run in a second moment / separate script
+# # 
+# # from hot_fair_utilities import predict
+#     print(f"\n---\n---\nStarting prediction on {city}\n")
+#     # prediction_output = f"{path_to_output}/{city}/prediction"   # !!! change file name here
+#     prediction_output = "" #### NAME PATH HERE!!!!!!!!!!!!!!!!!!
+#     predict(
+#         checkpoint_path=final_model_path,
+#         input_path=f"{city_path}/prediction/input", # the same of above?
+#         prediction_path=prediction_output,
+#     )
 
 #### ------ Prediction metrics
 
