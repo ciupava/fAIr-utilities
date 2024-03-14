@@ -84,6 +84,8 @@ def manage_fine_tuning_config(output_path, num_epochs, batch_size, freeze_layers
     config_base_path = os.path.join(working_dir, "ramp_config_base.json")
     dst_path = os.path.join(output_path, "ramp_fair_config_finetune.json")
 
+    print(f'config file name:{config_base_path}')
+    
     # Read the content of the source JSON file
     with open(config_base_path, "r") as f:
         data = json.load(f)

@@ -38,7 +38,7 @@
     },
     "num_classes":2,
     "num_epochs":20,
-    "batch_size":20,
+    "batch_size":5,
     "input_img_shape":[256,256],
     "output_img_shape":[256,256],
     "loss":{

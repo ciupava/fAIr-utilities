@@ -1,6 +1,7 @@
 # write a name per line, corresponding to the name of the folder where files are stored
+# lines starting with "#" will be treated as commented lines
 #1_Zanzibar
 #2_Kampala
 #4_Salvacion
-model51_td364
-#model95_td370
+#model51_td364
+model95_td370
