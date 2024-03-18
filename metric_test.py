@@ -32,6 +32,8 @@ sys.path.append('ramp-code/')
 import datetime
 from pathlib import Path
 import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 
 import cv2
 import warnings
@@ -79,6 +81,7 @@ def main():
         "-bch",
         "--batch_size",
         type=int,
+        nargs='+', # https://stackoverflow.com/questions/15753701/how-can-i-pass-a-list-as-a-command-line-argument-with-argparse
         required=False,
         default=5,
         help="Batch size to train model",
@@ -87,7 +90,8 @@ def main():
 
     # importing variables from command line
     n_of_epochs = args.n_of_epochs
-    n_of_batches = args.batch_size
+    # n_of_batches = args.batch_size
+    n_of_batches_array = args.batch_size
 
     list_filename =args.names_list
 
@@ -127,7 +131,7 @@ def main():
     # defining other parameters: (or obtain from config file and loop into these?)
     # n_of_epochs = 2
     # n_of_batches = 2
-    print(f'\n---\nNumber of epochs {n_of_epochs} and batch size {n_of_batches}\n---')
+    print(f'\n---\nNumber of epochs {n_of_epochs} and batch size {n_of_batches_array}\n---')
 
 
 
@@ -159,6 +163,7 @@ def main():
     #  Preprocessing is skipped as the images are already preprocessed.
 
     ### Prepare data and environment for training
+        print(f"---\nPreparing data for city {city}\n---")
     ## Split training dataset to: training, validation, prediction sets
         print(f"---\nSplitting the data training into training, validation and prediction datasets:\n")
         from hot_fair_utilities.training.prepare_data import split_training_2_validation_2_prediction
@@ -176,286 +181,337 @@ def main():
     ## Import config file
         from hot_fair_utilities.training.run_training import manage_fine_tuning_config
         
-        output_path = train_output
-        epoch_size = n_of_epochs
-        batch_size = n_of_batches
-        freeze_layers=False
-        cfg = manage_fine_tuning_config(
-                    output_path, epoch_size, batch_size, freeze_layers
-                )
-        # note that the above function is hard-coded on "ramp_config_base.json", change the cfg file name in there if needed
-
-    ### Training
-    
-        # from hot_fair_utilities import train
-        print(f"\n---\nStarting training on {city}\n---")
-        
-        discard_experiment = False
-        if "discard_experiment" in cfg:
-            discard_experiment = cfg["discard_experiment"]
-        cfg["timestamp"] = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-    
-    # --- Setting up metrics and loss
-        the_metrics = []
-        if cfg["metrics"]["use_metrics"]:
-            get_metrics_fn_names = cfg["metrics"]["get_metrics_fn_names"]
-            get_metrics_fn_parms = cfg["metrics"]["metrics_fn_parms"]
-            assert len(get_metrics_fn_names) == len(get_metrics_fn_parms)
-
-        #---
-        # TODO: manually changing here for OHE experiment
-            # get_metrics_fn_names = ["get_precision_fn", "get_iou_fn"]
-            # get_metrics_fn_names = ["get_sparse_categorical_accuracy_fn", "get_precision_fn", "get_iou_fn", "get_recall_fn"]
-            # get_metrics_fn_parms = [{}, {}, {}, {}]
-            # get_metrics_fn_names = ["get_precision_fn", "get_recall_fn"]
-            get_metrics_fn_names = [ "get_precision_fn", "get_iou_fn", "get_recall_fn"]
-            get_metrics_fn_parms = [{}, {}, {}]
-            #---
-            for get_mf_name, mf_parms in zip(get_metrics_fn_names, get_metrics_fn_parms):
-                
-                get_metric_fn = getattr(metric_constructors, get_mf_name)
-                print(f"Metric constructor function: {get_metric_fn.__name__}")
-                metric_fn = get_metric_fn(mf_parms)
-                the_metrics.append(metric_fn)
-
-        # specify a function that will construct the loss function
-        get_loss_fn_name = cfg["loss"]["get_loss_fn_name"]
-
-        #---
-        # TODO: manually changing here for OHE experiment
-        # get_loss_fn_name = ["get_sparse_categorical_crossentropy_fn", "get_categorical_crossentropy_fn"]
-        # get_loss_fn_parms = [{}, {}]
-        get_loss_fn_name = ["get_categorical_crossentropy_fn"]
-        get_loss_fn_parms = [{}]
-        # ---
-
-        # get_loss_fn = getattr(loss_constructors, get_loss_fn_name)
-        # # Construct the loss function
-        # loss_fn = get_loss_fn(cfg)
-
-        # print(f"Loss constructor function: {get_loss_fn.__name__}")
-
-        the_losses = []
-        for get_lf_name, lf_parms in zip(get_loss_fn_name, get_loss_fn_parms):
+        for batch_item in n_of_batches_array:
+            n_of_batches = batch_item
             
-            get_loss_fn = getattr(loss_constructors, get_lf_name)
-            print(f"Loss constructor functions: {get_loss_fn.__name__}")
-            loss_fn = get_loss_fn(lf_parms)
-            the_losses.append(loss_fn)
-    # --- construct optimizer ####
-        get_optimizer_fn_name = cfg["optimizer"]["get_optimizer_fn_name"]
-        get_optimizer_fn = getattr(optimizer_constructors, get_optimizer_fn_name)
+            output_path = train_output
+            epoch_size = n_of_epochs
+            batch_size = n_of_batches
+            freeze_layers=False
+            cfg = manage_fine_tuning_config(
+                        output_path, epoch_size, batch_size, freeze_layers
+                    )
+            # note that the above function is hard-coded on "ramp_config_base.json", change the cfg file name in there if needed
 
-        optimizer = get_optimizer_fn(cfg)
-
-        the_model = None
-
-        # SG: Using the saved model in this cell
-        working_ramp_home = os.environ["RAMP_HOME"]
-        # load (construct) the model
-        model_path = Path(working_ramp_home) / cfg["saved_model"]["saved_model_path"]
-        print(f"Model: importing saved model {str(model_path)}")
-        the_model = tf.keras.models.load_model(model_path)
-        assert (
-            the_model is not None
-        ), f"the saved model was not constructed: {model_path}"
-
-        if cfg["freeze_layers"]:
-            for layer in the_model.layers:
-                layer.trainable = False  # freeze previous layers only update new layers
-                # print("Setting previous model layers traininable : False")
-
-
-        print("-------")
-        print(f'-------{the_metrics}')
-        print("-------")
-
-        # If you don't want to save the original state of training, recompile the model.
-        the_model.compile(optimizer=optimizer, loss=loss_fn, metrics=[the_metrics])
-        # the_model.compile(optimizer=optimizer, loss=loss_fn, metrics=[precision_class_0,precision_class_1])
-
-        # the_model.compile(optimizer = optimizer,
-        #    loss=loss_fn,
-        #    metrics = [get_iou_coef_fn])
+        ### Training
         
-    # --- Introducing OHE (One Hot Encoded) for non sparse metrics
-        def ohe_batches(batches: tf.data.Dataset, depth=4) -> tf.data.Dataset:
-            """For given batches and depth map sparse labels to OHE."""
-            return batches.map(lambda x, y: (x, tf.one_hot(y[..., -1], depth, axis=-1)))
+            # from hot_fair_utilities import train
+            print(f"\n---\nStarting training on {city}\n---")
+            
+            discard_experiment = False
+            if "discard_experiment" in cfg:
+                discard_experiment = cfg["discard_experiment"]
+            cfg["timestamp"] = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+        
+        # --- Setting up metrics and loss
+            the_metrics = []
+            if cfg["metrics"]["use_metrics"]:
+                get_metrics_fn_names = cfg["metrics"]["get_metrics_fn_names"]
+                get_metrics_fn_parms = cfg["metrics"]["metrics_fn_parms"]
+                assert len(get_metrics_fn_names) == len(get_metrics_fn_parms)
 
-    # --- Getting batches ready for the training
-        from ramp.training.augmentation_constructors import get_augmentation_fn
-        from ramp.utils.misc_ramp_utils import get_num_files
-        from ramp.data_mgmt.data_generator import (
-            test_batches_from_gtiff_dirs,
-            training_batches_from_gtiff_dirs,
-        )
-        #### define data directories ####
-        train_img_dir = Path(working_ramp_home) / cfg["datasets"]["train_img_dir"]
-        train_mask_dir = Path(working_ramp_home) / cfg["datasets"]["train_mask_dir"]
-        val_img_dir = Path(working_ramp_home) / cfg["datasets"]["val_img_dir"]
-        val_mask_dir = Path(working_ramp_home) / cfg["datasets"]["val_mask_dir"]
+                # ---
+                # TODO: manually changing here for OHE experiment
+                # get_metrics_fn_names = ["get_precision_fn", "get_recall_fn"]
+                # get_onehotiou_fn
+                # get_metrics_fn_names = [ "get_precision_fn", "get_iou_fn", "get_recall_fn"]
+                # get_metrics_fn_parms = [{}, {}, {}]
+                # ---
+                for get_mf_name, mf_parms in zip(get_metrics_fn_names, get_metrics_fn_parms):
+                    
+                    get_metric_fn = getattr(metric_constructors, get_mf_name)
+                    print(f"Metric constructor function: {get_metric_fn.__name__}")
+                    metric_fn = get_metric_fn(mf_parms)
+                    the_metrics.append(metric_fn)
 
-        #### get the augmentation transform ####
-        # aug = None
-        if cfg["augmentation"]["use_aug"]:
-            aug = get_augmentation_fn(cfg)
+            # specify a function that will construct the loss function
+            get_loss_fn_name = cfg["loss"]["get_loss_fn_name"]
 
-        ## RUNTIME Parameters
-        batch_size = cfg["batch_size"]
-        input_img_shape = cfg["input_img_shape"]
-        output_img_shape = cfg["output_img_shape"]
+            # ---
+            # TODO: manually changing here for OHE experiment
+            # get_loss_fn_name = ["get_sparse_categorical_crossentropy_fn", "get_categorical_crossentropy_fn"]
+            # get_loss_fn_name = ["get_categorical_crossentropy_fn"]
+            # ---
+            get_loss_fn = getattr(loss_constructors, get_loss_fn_name)
+            # Construct the loss function
+            loss_fn = get_loss_fn(cfg)
+            print(f"Loss constructor function: {get_loss_fn.__name__}")
 
-        n_training = get_num_files(train_img_dir, "*.tif")
-        n_val = get_num_files(val_img_dir, "*.tif")
-        steps_per_epoch = n_training // batch_size
-        validation_steps = n_val // batch_size
-        # Testing step , not recommended
-        if validation_steps <= 0:
-            validation_steps = 1
+        # --- construct optimizer ####
+            get_optimizer_fn_name = cfg["optimizer"]["get_optimizer_fn_name"]
+            get_optimizer_fn = getattr(optimizer_constructors, get_optimizer_fn_name)
 
-        # add these back to the config
-        # in case they are needed by callbacks
-        cfg["runtime"] = {}
-        cfg["runtime"]["n_training"] = n_training
-        cfg["runtime"]["n_val"] = n_val
-        cfg["runtime"]["steps_per_epoch"] = steps_per_epoch
-        cfg["runtime"]["validation_steps"] = validation_steps
+            optimizer = get_optimizer_fn(cfg)
 
-        train_batches = None
+            the_model = None
 
-        if aug is not None:
-            train_batches = training_batches_from_gtiff_dirs(
-                train_img_dir,
-                train_mask_dir,
-                batch_size,
-                input_img_shape,
-                output_img_shape,
-                transforms=aug,
+            # SG: Using the saved model in this cell
+            working_ramp_home = os.environ["RAMP_HOME"]
+            # load (construct) the model
+            model_path = Path(working_ramp_home) / cfg["saved_model"]["saved_model_path"]
+            print(f"Model: importing saved model {str(model_path)}")
+            the_model = tf.keras.models.load_model(model_path)
+            assert (
+                the_model is not None
+            ), f"the saved model was not constructed: {model_path}"
+
+            if cfg["freeze_layers"]:
+                for layer in the_model.layers:
+                    layer.trainable = False  # freeze previous layers only update new layers
+                    # print("Setting previous model layers traininable : False")
+
+
+            print("-------")
+            print(f'-------{the_metrics}')
+            print("-------")
+
+            # If you don't want to save the original state of training, recompile the model.
+            the_model.compile(optimizer=optimizer, loss=loss_fn, metrics=[the_metrics])
+            # the_model.compile(optimizer=optimizer, loss=loss_fn, metrics=[precision_class_0,precision_class_1])
+
+            # the_model.compile(optimizer = optimizer,
+            #    loss=loss_fn,
+            #    metrics = [get_iou_coef_fn])
+            
+        # --- Introducing OHE (One Hot Encoded) for non sparse metrics
+            def ohe_batches(batches: tf.data.Dataset, depth=4) -> tf.data.Dataset:
+                """For given batches and depth map sparse labels to OHE."""
+                return batches.map(lambda x, y: (x, tf.one_hot(y[..., -1], depth, axis=-1)))
+
+        # --- Getting batches ready for the training
+            from ramp.training.augmentation_constructors import get_augmentation_fn
+            from ramp.utils.misc_ramp_utils import get_num_files
+            from ramp.data_mgmt.data_generator import (
+                test_batches_from_gtiff_dirs,
+                training_batches_from_gtiff_dirs,
             )
-        else:
-            train_batches = training_batches_from_gtiff_dirs(
-                train_img_dir, train_mask_dir, batch_size, input_img_shape, output_img_shape
-            )
-        assert train_batches is not None, "training batches were not constructed"
-        print(f"-------\n* train img dir{train_img_dir}\n* train mask dir{train_mask_dir}")
-        print(f"* input img shape{input_img_shape}\n* output img shape{output_img_shape}")
+            #### define data directories ####
+            train_img_dir = Path(working_ramp_home) / cfg["datasets"]["train_img_dir"]
+            train_mask_dir = Path(working_ramp_home) / cfg["datasets"]["train_mask_dir"]
+            val_img_dir = Path(working_ramp_home) / cfg["datasets"]["val_img_dir"]
+            val_mask_dir = Path(working_ramp_home) / cfg["datasets"]["val_mask_dir"]
 
+            #### get the augmentation transform ####
+            # aug = None
+            if cfg["augmentation"]["use_aug"]:
+                aug = get_augmentation_fn(cfg)
 
-        #---
-        # TODO: manually changing here for OHE experiment
-        train_batches = ohe_batches(train_batches)
-        #---
+            ## RUNTIME Parameters
+            batch_size = cfg["batch_size"]
+            input_img_shape = cfg["input_img_shape"]
+            output_img_shape = cfg["output_img_shape"]
 
-    # --- Getting ready also validation batches:
-        # Validation batches
-        val_batches = test_batches_from_gtiff_dirs(
-            val_img_dir, val_mask_dir, batch_size, input_img_shape, output_img_shape
-        )
+            n_training = get_num_files(train_img_dir, "*.tif")
+            n_val = get_num_files(val_img_dir, "*.tif")
+            steps_per_epoch = n_training // batch_size
+            validation_steps = n_val // batch_size
+            # Testing step , not recommended
+            if validation_steps <= 0:
+                validation_steps = 1
 
-        #---
-        # TODO: manually changing here for OHE experiment
-        val_batches = ohe_batches(val_batches)
-        #---
+            # add these back to the config
+            # in case they are needed by callbacks
+            cfg["runtime"] = {}
+            cfg["runtime"]["n_training"] = n_training
+            cfg["runtime"]["n_val"] = n_val
+            cfg["runtime"]["steps_per_epoch"] = steps_per_epoch
+            cfg["runtime"]["validation_steps"] = validation_steps
 
-        assert val_batches is not None, "validation batches were not constructed"
-        print(f"-------\n* val img dir{val_img_dir}\n* val mask dir{val_mask_dir}\n-------")
-        print(val_batches)
-        print('*\n*\n')
+            train_batches = None
 
-    # --- Set up training callbacks
-        callbacks_list = []
-
-        if not discard_experiment:
-            # get model checkpoint callback
-            if cfg["model_checkpts"]["use_model_checkpts"]:
-                get_model_checkpt_callback_fn_name = cfg["model_checkpts"][
-                    "get_model_checkpt_callback_fn_name"
-                ]
-                get_model_checkpt_callback_fn = getattr(
-                    callback_constructors, get_model_checkpt_callback_fn_name
+            if aug is not None:
+                train_batches = training_batches_from_gtiff_dirs(
+                    train_img_dir,
+                    train_mask_dir,
+                    batch_size,
+                    input_img_shape,
+                    output_img_shape,
+                    transforms=aug,
                 )
-                callbacks_list.append(get_model_checkpt_callback_fn(cfg))
-
-            # get tensorboard callback
-            if cfg["tensorboard"]["use_tb"]:
-                get_tb_callback_fn_name = cfg["tensorboard"]["get_tb_callback_fn_name"]
-                get_tb_callback_fn = getattr(callback_constructors, get_tb_callback_fn_name)
-                callbacks_list.append(get_tb_callback_fn(cfg))
-
-            # get tensorboard model prediction logging callback
-            if cfg["prediction_logging"]["use_prediction_logging"]:
-                assert cfg["tensorboard"][
-                    "use_tb"
-                ], "Tensorboard logging must be turned on to enable prediction logging"
-                get_prediction_logging_fn_name = cfg["prediction_logging"][
-                    "get_prediction_logging_fn_name"
-                ]
-                get_prediction_logging_fn = getattr(
-                    callback_constructors, get_prediction_logging_fn_name
+            else:
+                train_batches = training_batches_from_gtiff_dirs(
+                    train_img_dir, train_mask_dir, batch_size, input_img_shape, output_img_shape
                 )
-                callbacks_list.append(get_prediction_logging_fn(the_model, cfg))
+            assert train_batches is not None, "training batches were not constructed"
+            print(f"-------\n* train img dir{train_img_dir}\n* train mask dir{train_mask_dir}")
+            print(f"* input img shape{input_img_shape}\n* output img shape{output_img_shape}")
 
-        # free up RAM
-        tf.keras.backend.clear_session()
 
-        if cfg["early_stopping"]["use_early_stopping"]:
-            callbacks_list.append(callback_constructors.get_early_stopping_callback_fn(cfg))
+            #---
+            # TODO: manually changing here for OHE experiment
+            train_batches = ohe_batches(train_batches)
+            #---
 
-            # get cyclic learning scheduler callback
-        if cfg["cyclic_learning_scheduler"]["use_clr"]:
-            assert not cfg["early_stopping"][
-                "use_early_stopping"
-            ], "cannot use early_stopping with cycling_learning_scheduler"
-            get_clr_callback_fn_name = cfg["cyclic_learning_scheduler"][
-                "get_clr_callback_fn_name"
-            ]
-            get_clr_callback_fn = getattr(callback_constructors, get_clr_callback_fn_name)
-            callbacks_list.append(get_clr_callback_fn(cfg))
-
-    # --- import matplotlib.pyplot as plt
-        from time import perf_counter
-
-    # --- Main training block
-        n_epochs = n_of_epochs
-        # # SG: manually make this 10
-        # n_epochs = 5
-        print(
-            f"Starting Training with {n_epochs} epochs , {batch_size} batch size , {steps_per_epoch} steps per epoch , {validation_steps} validation steps......"
-        )
-        if validation_steps <= 0:
-            raise RaiseError(
-                "Not enough data for training, Increase image or Try reducing batchsize/epochs"
+        # --- Getting ready also validation batches:
+            # Validation batches
+            val_batches = test_batches_from_gtiff_dirs(
+                val_img_dir, val_mask_dir, batch_size, input_img_shape, output_img_shape
             )
-        # FIXME : Make checkpoint
-        start = perf_counter()
-        history = the_model.fit(
-            train_batches,
-            epochs=n_epochs,
-            steps_per_epoch=steps_per_epoch,
-            validation_data=val_batches,
-            validation_steps=validation_steps,
-            callbacks=callbacks_list,
-        )
-        end = perf_counter()
-        print(f"Training Finished , Time taken to train : {end-start} seconds")
-        print('\n-----\nHistory:')
-        print(history.history.keys())
-        print('\n-----')
+
+            #---
+            # TODO: manually changing here for OHE experiment
+            val_batches = ohe_batches(val_batches)
+            #---
+
+            assert val_batches is not None, "validation batches were not constructed"
+            print(f"-------\n* val img dir{val_img_dir}\n* val mask dir{val_mask_dir}\n-------")
+            print(val_batches)
+            print('*\n*\n')
+
+        # --- Set up training callbacks
+            callbacks_list = []
+
+            if not discard_experiment:
+                # get model checkpoint callback
+                if cfg["model_checkpts"]["use_model_checkpts"]:
+                    get_model_checkpt_callback_fn_name = cfg["model_checkpts"][
+                        "get_model_checkpt_callback_fn_name"
+                    ]
+                    get_model_checkpt_callback_fn = getattr(
+                        callback_constructors, get_model_checkpt_callback_fn_name
+                    )
+                    callbacks_list.append(get_model_checkpt_callback_fn(cfg))
+
+                # get tensorboard callback
+                if cfg["tensorboard"]["use_tb"]:
+                    get_tb_callback_fn_name = cfg["tensorboard"]["get_tb_callback_fn_name"]
+                    get_tb_callback_fn = getattr(callback_constructors, get_tb_callback_fn_name)
+                    callbacks_list.append(get_tb_callback_fn(cfg))
+
+                # get tensorboard model prediction logging callback
+                if cfg["prediction_logging"]["use_prediction_logging"]:
+                    assert cfg["tensorboard"][
+                        "use_tb"
+                    ], "Tensorboard logging must be turned on to enable prediction logging"
+                    get_prediction_logging_fn_name = cfg["prediction_logging"][
+                        "get_prediction_logging_fn_name"
+                    ]
+                    get_prediction_logging_fn = getattr(
+                        callback_constructors, get_prediction_logging_fn_name
+                    )
+                    callbacks_list.append(get_prediction_logging_fn(the_model, cfg))
+
+            # free up RAM
+            tf.keras.backend.clear_session()
+
+            if cfg["early_stopping"]["use_early_stopping"]:
+                callbacks_list.append(callback_constructors.get_early_stopping_callback_fn(cfg))
+
+                # get cyclic learning scheduler callback
+            if cfg["cyclic_learning_scheduler"]["use_clr"]:
+                assert not cfg["early_stopping"][
+                    "use_early_stopping"
+                ], "cannot use early_stopping with cycling_learning_scheduler"
+                get_clr_callback_fn_name = cfg["cyclic_learning_scheduler"][
+                    "get_clr_callback_fn_name"
+                ]
+                get_clr_callback_fn = getattr(callback_constructors, get_clr_callback_fn_name)
+                callbacks_list.append(get_clr_callback_fn(cfg))
+
+        # --- import matplotlib.pyplot as plt
+            from time import perf_counter
+
+        # --- Main training block
+            n_epochs = n_of_epochs
+            # # SG: manually make this 10
+            # n_epochs = 5
+            print(
+                f"Starting Training with {n_epochs} epochs , {batch_size} batch size , {steps_per_epoch} steps per epoch , {validation_steps} validation steps......"
+            )
+            if validation_steps <= 0:
+                raise RaiseError(
+                    "Not enough data for training, Increase image or Try reducing batchsize/epochs"
+                )
+            # FIXME : Make checkpoint
+            start = perf_counter()
+            history = the_model.fit(
+                train_batches,
+                epochs=n_epochs,
+                steps_per_epoch=steps_per_epoch,
+                validation_data=val_batches,
+                validation_steps=validation_steps,
+                callbacks=callbacks_list,
+            )
+            end = perf_counter()
+            print(f"Training Finished , Time taken to train : {end-start} seconds")
+            print('\n-----\nHistory:')
+            print(history.history.keys())
+            print('\n-----')
 
 
-    #### ------ Saving training metrics
-        # print(f"Final accuracy: {final_accuracy} and final model path: {final_model_path}")
-        # store this output somewhere!!
-        accuracy_filename = f'{city}_bch{n_of_batches}_epc{n_of_epochs}.csv'
-        accuracy_file_path = f'{path_to_acc_output}/accuracies/{accuracy_filename}'
-        accuracy_output = f'.{accuracy_file_path}'
-        print(f'filename {accuracy_filename}')
-        print(f'acc filepath {accuracy_file_path}')
-        print(f'\n---\nAccuracy dataframe is being saved at: {accuracy_output}\n---')
-        history_df = pd.DataFrame.from_dict(history.history)
-        history_df.to_csv(accuracy_filename)
+        #### ------ Saving training metrics
+            # print(f"Final accuracy: {final_accuracy} and final model path: {final_model_path}")
+            # store this output somewhere!!
+            accuracy_filename = f'{city}_bch{n_of_batches}_epc{n_of_epochs}.csv'
+            accuracy_file_path = f'{path_to_acc_output}/accuracies/{accuracy_filename}'
+            accuracy_output = f'{accuracy_file_path}'
+            
+            print(f'filename {accuracy_filename}')
+            print(f'path to acc output {path_to_acc_output}')
+            print(f'acc filepath {accuracy_file_path}')
+            print(f'\n---\nAccuracy dataframe is being saved at: {accuracy_output}\n---')
+            history_df = pd.DataFrame.from_dict(history.history)
+            history_df.to_csv(accuracy_output)
+            
+            # Save history
+            history_file_name = f'history_{city}_bch{n_of_batches}_epc{n_of_epochs}.npy'
+            history_output_path = f'{path_to_acc_output}/accuracies/{history_file_name}'
+            np.save(history_output_path,history.history)
+            
+            # Plot and save plot!
+            
+            # plot the training and validation accuracy and loss at each epoch
+            print("Generating graphs ....")
+            graph_file_name = f'graph_{city}_bch{n_of_batches}_epc{n_of_epochs}.png'
+            graph_output = f'{path_to_acc_output}/accuracies/{graph_file_name}'
 
+            loss = history.history["loss"]
+            # val_loss = history.history["val_loss"]
+            epochs = range(1, len(loss) + 1)
+
+            # acc = history.history["sparse_categorical_accuracy"]
+            # val_acc = history.history["val_sparse_categorical_accuracy"]
+
+            #---
+            # TODO: updated for OHE
+            acc = history.history["categorical_accuracy"]
+            val_acc = history.history["val_categorical_accuracy"]
+            acc1 = history.history["recall_1"]
+            val_acc1 = history.history["val_recall_1"]
+            acc2 = history.history["precision_1"]
+            val_acc2 = history.history["val_precision_1"]
+            acc3 = history.history["ohe_iou"]
+            val_acc3 = history.history["val_ohe_iou"]
+            loss = history.history["loss"]
+            #---
+
+            # Plot training and validation accuracy
+            plt.plot(epochs, acc, "y", label="Train cat accuracy")
+            plt.plot(epochs, val_acc, "y", linestyle='dashed', label="Valid cat accuracy")
+            plt.plot(epochs, acc1, "b", label="Train recall")
+            plt.plot(epochs, val_acc1, "b", linestyle='dashed', label="Valid recall")
+            plt.plot(epochs, acc2, "c", label="Train precision")
+            plt.plot(epochs, val_acc2, "c", linestyle='dashed', label="Valid precision")
+            plt.plot(epochs, acc3, "r", label="Train IoU")
+            plt.plot(epochs, val_acc3, "r", linestyle='dashed', label="Valid Iou")
+            plt.plot(epochs, loss, "m", linestyle='dotted', label="Loss")
+            
+
+            # Set labels and title
+            plt.xlabel("Epochs")
+            plt.ylabel("Accuracy")
+            plt.title("Training and Validation Accuracy")
+
+            plt.legend()
+            plt.savefig(
+                f"{graph_output}"
+            )
+            print(f"Graph generated at : {graph_output}")
+            
+            # clear the plot to avoid overlapping figures! https://stackoverflow.com/questions/17106288/how-to-forget-previous-plots-how-can-i-flush-refresh
+            plt.clf()
+            plt.cla()
+            plt.close()
 
     # ### Prediction
     #  will be run in a second moment / separate script ?
