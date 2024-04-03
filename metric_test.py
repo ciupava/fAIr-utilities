@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # python3 metric_test.py cities_list.txt
-# python3 metric_test.py -lst cities_list.txt -nep 20 -bch 5
+# python3 metric_test.py -lst cities_list.txt -nep 20 -bch 2 4 8 16
 
 """
 Testing process to generate a metric to measure fAIr's performance.
