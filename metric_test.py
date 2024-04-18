@@ -34,6 +34,8 @@ from pathlib import Path
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+import seaborn as sns
 
 import cv2
 import warnings
@@ -47,7 +49,7 @@ import ramp
 # fair_utilities specific
 import hot_fair_utilities
 from hot_fair_utilities import preprocess, predict, polygonize
-from hot_fair_utilities.training import train_metric
+# from hot_fair_utilities.training import train_metric
 
 # for the parser
 import argparse
@@ -438,7 +440,10 @@ def main():
             print(history.history.keys())
             print('\n-----')
 
-
+        # ---
+        # TODO: add a call with `extract_highest_accuracy_model` to do cleanup
+        # extract_highest_accuracy_model(model_path)
+        # ---
         #### ------ Saving training metrics
             # print(f"Final accuracy: {final_accuracy} and final model path: {final_model_path}")
             # store this output somewhere!!
@@ -453,13 +458,12 @@ def main():
             history_df = pd.DataFrame.from_dict(history.history)
             history_df.to_csv(accuracy_output)
             
-            # Save history
+        # --- Save history
             history_file_name = f'history_{city}_bch{n_of_batches}_epc{n_of_epochs}.npy'
             history_output_path = f'{path_to_acc_output}/accuracies/{history_file_name}'
             np.save(history_output_path,history.history)
             
-            # Plot and save plot!
-            
+        # --- Plot and save plot!
             # plot the training and validation accuracy and loss at each epoch
             print("Generating graphs ....")
             graph_file_name = f'graph_{city}_bch{n_of_batches}_epc{n_of_epochs}.png'
@@ -467,51 +471,65 @@ def main():
 
             loss = history.history["loss"]
             # val_loss = history.history["val_loss"]
-            epochs = range(1, len(loss) + 1)
+            # epochs = range(1, len(loss) + 1)
 
             # acc = history.history["sparse_categorical_accuracy"]
             # val_acc = history.history["val_sparse_categorical_accuracy"]
 
-            #---
-            # TODO: updated for OHE
-            acc = history.history["categorical_accuracy"]
-            val_acc = history.history["val_categorical_accuracy"]
-            acc1 = history.history["recall_1"]
-            val_acc1 = history.history["val_recall_1"]
-            acc2 = history.history["precision_1"]
-            val_acc2 = history.history["val_precision_1"]
-            acc3 = history.history["ohe_iou"]
-            val_acc3 = history.history["val_ohe_iou"]
-            loss = history.history["loss"]
-            #---
-
-            # Plot training and validation accuracy
-            plt.plot(epochs, acc, "y", label="Train cat accuracy")
-            plt.plot(epochs, val_acc, "y", linestyle='dashed', label="Valid cat accuracy")
-            plt.plot(epochs, acc1, "b", label="Train recall")
-            plt.plot(epochs, val_acc1, "b", linestyle='dashed', label="Valid recall")
-            plt.plot(epochs, acc2, "c", label="Train precision")
-            plt.plot(epochs, val_acc2, "c", linestyle='dashed', label="Valid precision")
-            plt.plot(epochs, acc3, "r", label="Train IoU")
-            plt.plot(epochs, val_acc3, "r", linestyle='dashed', label="Valid Iou")
-            plt.plot(epochs, loss, "m", linestyle='dotted', label="Loss")
             
+            #  --- Seaborn version ---
+            
+            # graph_file_name = f'graph_{name_noextension}_v2.png'
+            # graph_output = f'{history_dir}{graph_file_name}'
 
-            # Set labels and title
-            plt.xlabel("Epochs")
-            plt.ylabel("Accuracy")
-            plt.title("Training and Validation Accuracy")
+            loss =  history_df.loc[:,"loss"]
+            ### epochs = range(1, len(loss) + 1)
 
-            plt.legend()
-            plt.savefig(
-                f"{graph_output}"
-            )
+            #  ---
+            # convert to long (tidy) form
+            # history_df.assign(epoch=range(1, len(loss) + 1))
+            history_df['epoch'] = range(1, len(history_df) + 1)
+            # print(history_df.info())
+            # print(history_df.iloc[0:5,:])
+            # melt the dataframe
+            dfm = history_df.melt('epoch', var_name='col_names', value_name='vals')
+            # generate column for type train/valid:
+            dfm['type'] = np.where(dfm.col_names.str.contains("val"), "valid", "train")
+            # generate column with fancier name of the metric, for plotting
+            dfm['metric'] = np.where(dfm.col_names.str.contains("loss"), "Loss",
+                            np.where(dfm.col_names.str.contains("precision"), "Precision",
+                            np.where(dfm.col_names.str.contains("recall"), "Recall",
+                            np.where(dfm.col_names.str.contains("iou"), "IoU",
+                            np.where(dfm.col_names.str.contains("categorical"), "Accuracy", "")))))
+            #  ---
+
+            # ---
+            palette_div=sns.color_palette("Dark2", 10)
+            sns.set_palette(palette_div)
+            sns.set_style("whitegrid")
+            sns_plot = sns.lineplot(data=dfm,
+                        x="epoch",
+                        y="vals",
+                        hue='metric',
+                        palette=palette_div,
+                        style='type')
+            sns_plot.set(xlabel='Epochs',
+            ylabel='Accuracy',
+            title='Training/validation accuracies')
+            
+            sns_plot.set_ylim(bottom=0, top=1) # this is to avoid Loss values to alter the graph limits
+            sns_plot.xaxis.set_major_locator(ticker.MultipleLocator(5)) # adding ticks at multiples of 5
+            sns_plot.xaxis.set_major_formatter(ticker.ScalarFormatter())
+            sns_plot.get_figure().savefig(graph_output)
+            
+            sns_plot.get_figure().savefig(graph_output)
+            sns_plot.get_figure().show()
+
             print(f"Graph generated at : {graph_output}")
             
-            # clear the plot to avoid overlapping figures! https://stackoverflow.com/questions/17106288/how-to-forget-previous-plots-how-can-i-flush-refresh
-            plt.clf()
-            plt.cla()
-            plt.close()
+            # # clearing up the figure for next plot
+            sns_plot.get_figure().clf()
+
 
     # ### Prediction
     #  will be run in a second moment / separate script ?

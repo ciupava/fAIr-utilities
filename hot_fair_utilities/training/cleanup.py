@@ -26,6 +26,15 @@ def extract_highest_accuracy_model(output_path):
 
     # get the highest accuracy model one
     latest_entry_path = os.path.join(model_checkpoints, latest_entry)
+    # ---
+    # To remove entries that are not the latest, create new list of not latest entries
+    not_latest_entries = [entry for entry in entries if entry != latest_entry]
+    print("Latest entry: ", latest_entry)
+    print("List of not latest_entries: ", not_latest_entries)
+    # Loop over list of not_latest_entries and remove the checkpoint file
+    for entry in not_latest_entries:
+        os.remove(os.path.join(model_checkpoints, entry))
+    # ---
     print(latest_entry_path)
     highest_accuracy = 0
     highest_accuracy_entry = None
