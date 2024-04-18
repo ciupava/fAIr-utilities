@@ -49,7 +49,7 @@ import ramp
 # fair_utilities specific
 import hot_fair_utilities
 from hot_fair_utilities import preprocess, predict, polygonize
-# from hot_fair_utilities.training import train_metric
+from hot_fair_utilities.training.cleanup import extract_highest_accuracy_model
 
 # for the parser
 import argparse
@@ -225,6 +225,7 @@ def main():
                     print(f"Metric constructor function: {get_metric_fn.__name__}")
                     metric_fn = get_metric_fn(mf_parms)
                     the_metrics.append(metric_fn)
+                print("Note that the first metric in the above list will be the\none used as benchmark for saving the model check-points\n(i.e. the validation accuracy for that metric)")
 
             # specify a function that will construct the loss function
             get_loss_fn_name = cfg["loss"]["get_loss_fn_name"]
@@ -238,6 +239,7 @@ def main():
             # Construct the loss function
             loss_fn = get_loss_fn(cfg)
             print(f"Loss constructor function: {get_loss_fn.__name__}")
+
 
         # --- construct optimizer ####
             get_optimizer_fn_name = cfg["optimizer"]["get_optimizer_fn_name"]
@@ -443,6 +445,10 @@ def main():
         # ---
         # TODO: add a call with `extract_highest_accuracy_model` to do cleanup
         # extract_highest_accuracy_model(model_path)
+            final_accuracy, final_model_path = extract_highest_accuracy_model(output_path)
+            print(f'\n-----\nFinal accuracy: {final_accuracy}')
+            print(f'\n-----\nFinal model path: {final_model_path}')
+            print('\n-----')
         # ---
         #### ------ Saving training metrics
             # print(f"Final accuracy: {final_accuracy} and final model path: {final_model_path}")
@@ -518,7 +524,7 @@ def main():
             title='Training/validation accuracies')
             
             sns_plot.set_ylim(bottom=0, top=1) # this is to avoid Loss values to alter the graph limits
-            sns_plot.xaxis.set_major_locator(ticker.MultipleLocator(5)) # adding ticks at multiples of 5
+            sns_plot.xaxis.set_major_locator(ticker.MultipleLocator(2)) # adding ticks at multiples of 2
             sns_plot.xaxis.set_major_formatter(ticker.ScalarFormatter())
             sns_plot.get_figure().savefig(graph_output)
             
