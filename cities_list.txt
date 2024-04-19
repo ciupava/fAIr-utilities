@@ -4,21 +4,21 @@
 #2_Kampala
 #4_Salvacion
 # --- first batch:
-model51_td364
+#model51_td364
 model97_td372
-model95_td370
-model110_td394
-model98_td373
+#model95_td370
+#model110_td394
 model112_td397
-model113_td398
-model114_td399
+#model98_td373
+#model113_td398
+#model114_td399
 # --- second batch:
-model102_td391
-model134_td456
-model135_td459
-model136_td462
-model137_td463
+#model134_td456
+#model102_td391
+#model135_td459
+#model136_td462
+#model137_td463
 # --- third batch:
-model147_td485
-model148_td488
-model149_td489
+#model148_td488
+#model147_td485
+#model149_td489

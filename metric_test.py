@@ -225,7 +225,7 @@ def main():
                     print(f"Metric constructor function: {get_metric_fn.__name__}")
                     metric_fn = get_metric_fn(mf_parms)
                     the_metrics.append(metric_fn)
-                print("Note that the first metric in the above list will be the\none used as benchmark for saving the model check-points\n(i.e. the validation accuracy for that metric)")
+                print("--->Note: \n    | the first metric in the above list will be the\n    | one used as benchmark for saving the model check-points\n    | (i.e. the validation accuracy for that metric)")
 
             # specify a function that will construct the loss function
             get_loss_fn_name = cfg["loss"]["get_loss_fn_name"]
