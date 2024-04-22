@@ -5,9 +5,10 @@ import shutil
 
 def extract_highest_accuracy_model(output_path):
     model_checkpoints = os.path.join(output_path, "model-checkpts")
+    print("model chkpoint parent folder:", model_checkpoints)
     assert os.path.exists(model_checkpoints), "Model Checkpoints Doesn't Exist"
     entries_folders = os.listdir(model_checkpoints)
-    print('\n---\nModel checkpoints folder (one per batch size):', entries_folders)
+    print('\n---\nModel checkpoints folders (one per batch size):', entries_folders)
     assert len(entries_folders) > 0, "Couldn't find any models"
     
     for entry_folder in entries_folders:
@@ -68,4 +69,4 @@ def extract_highest_accuracy_model(output_path):
                 # If the entry is not the file or directory you want to keep, use the os.remove() method to remove it
                 # shutil.rmtree(os.path.join(latest_entry_path, entry))
                 shutil.rmtree(os.path.join(latest_entry_path, entry))
-        return highest_accuracy, os.path.join(latest_entry_path, highest_accuracy_entry)
+    return highest_accuracy, os.path.join(latest_entry_path, highest_accuracy_entry)

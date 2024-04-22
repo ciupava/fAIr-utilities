@@ -442,14 +442,6 @@ def main():
             print(history.history.keys())
             print('\n-----')
 
-        # ---
-        # TODO: add a call with `extract_highest_accuracy_model` to do cleanup
-        # extract_highest_accuracy_model(model_path)
-            final_accuracy, final_model_path = extract_highest_accuracy_model(output_path)
-            print(f'\n-----\nFinal accuracy: {final_accuracy}')
-            print(f'\n-----\nFinal model path: {final_model_path}')
-            print('\n-----')
-        # ---
         #### ------ Saving training metrics
             # print(f"Final accuracy: {final_accuracy} and final model path: {final_model_path}")
             # store this output somewhere!!
@@ -500,7 +492,7 @@ def main():
             # melt the dataframe
             dfm = history_df.melt('epoch', var_name='col_names', value_name='vals')
             # generate column for type train/valid:
-            dfm['type'] = np.where(dfm.col_names.str.contains("val"), "valid", "train")
+            dfm['type'] = np.where(dfm.col_names.str.contains("val"), "valid", "train") # "valid" where 'val', otherwise "train"
             # generate column with fancier name of the metric, for plotting
             dfm['metric'] = np.where(dfm.col_names.str.contains("loss"), "Loss",
                             np.where(dfm.col_names.str.contains("precision"), "Precision",
@@ -523,7 +515,7 @@ def main():
             ylabel='Accuracy',
             title='Training/validation accuracies')
             
-            sns_plot.set_ylim(bottom=0, top=1) # this is to avoid Loss values to alter the graph limits
+            sns_plot.set_ylim(bottom=0, top=1) # this is to avoid Loss values (>1) to alter the graph limits
             sns_plot.xaxis.set_major_locator(ticker.MultipleLocator(2)) # adding ticks at multiples of 2
             sns_plot.xaxis.set_major_formatter(ticker.ScalarFormatter())
             sns_plot.get_figure().savefig(graph_output)
@@ -535,6 +527,17 @@ def main():
             
             # # clearing up the figure for next plot
             sns_plot.get_figure().clf()
+
+
+    # ---
+    # TODO: add a call with `extract_highest_accuracy_model` to do cleanup
+    # extract_highest_accuracy_model(model_path)
+        final_accuracy, final_model_path = extract_highest_accuracy_model(output_path)
+        print(f'\n-----\nFinal accuracy: {final_accuracy}')
+        print(f'\n-----\nFinal model path: {final_model_path}')
+        print('\n-----')
+    # ---
+
 
 
     # ### Prediction
