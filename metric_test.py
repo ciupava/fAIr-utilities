@@ -468,25 +468,24 @@ def main():
             graph_output = f'{path_to_acc_output}/accuracies/{graph_file_name}'
 
             loss = history.history["loss"]
-            # val_loss = history.history["val_loss"]
-            # epochs = range(1, len(loss) + 1)
+            val_loss = history_df.loc[:,"val_loss"]
+            epochs = list(range(1, len(loss) + 1))
 
-            # acc = history.history["sparse_categorical_accuracy"]
-            # val_acc = history.history["val_sparse_categorical_accuracy"]
-
-            
             #  --- Seaborn version ---
-            
-            # graph_file_name = f'graph_{name_noextension}_v2.png'
-            # graph_output = f'{history_dir}{graph_file_name}'
-
-            loss =  history_df.loc[:,"loss"]
-            ### epochs = range(1, len(loss) + 1)
-
+            # ---
+            # dataframe with only loss - to be able to map it later
+            loss_df = pd.DataFrame(data={'epoch': epochs, 'loss': loss, 'val_loss': val_loss})
+            # melt the dataframe
+            dfm_loss = loss_df.melt('epoch', var_name='col_names', value_name='vals')
+            # generate column for type train/valid:
+            dfm_loss['type'] = np.where(dfm_loss.col_names.str.contains("val"), "valid", "train")
+            # generate column with fancier name of the metric, for plotting
+            dfm_loss['metric'] = np.where(dfm_loss.type.str.contains("train"), "Loss", "")
             #  ---
-            # convert to long (tidy) form
-            # history_df.assign(epoch=range(1, len(loss) + 1))
-            history_df['epoch'] = range(1, len(history_df) + 1)
+            # convert to long (tidy) form:
+            history_df['epoch'] = range(1, len(history_df) + 1) # create column "epoch"
+            history_df = history_df.drop('loss', axis = 1) # get rid of column 'loss' to be able to plot it separately
+            history_df = history_df.drop('val_loss', axis = 1) # get rid of column 'loss' to be able to plot it separately
             # print(history_df.info())
             # print(history_df.iloc[0:5,:])
             # melt the dataframe
@@ -494,39 +493,82 @@ def main():
             # generate column for type train/valid:
             dfm['type'] = np.where(dfm.col_names.str.contains("val"), "valid", "train") # "valid" where 'val', otherwise "train"
             # generate column with fancier name of the metric, for plotting
-            dfm['metric'] = np.where(dfm.col_names.str.contains("loss"), "Loss",
-                            np.where(dfm.col_names.str.contains("precision"), "Precision",
+            dfm['metric'] = np.where(dfm.col_names.str.contains("precision"), "Precision",
                             np.where(dfm.col_names.str.contains("recall"), "Recall",
                             np.where(dfm.col_names.str.contains("iou"), "IoU",
-                            np.where(dfm.col_names.str.contains("categorical"), "Accuracy", "")))))
+                            np.where(dfm.col_names.str.contains("categorical"), "Accuracy", ""))))
             #  ---
 
             # ---
             palette_div=sns.color_palette("Dark2", 10)
             sns.set_palette(palette_div)
             sns.set_style("whitegrid")
-            sns_plot = sns.lineplot(data=dfm,
+            # sns_plot = sns.lineplot(data=dfm,
+            #             x="epoch",
+            #             y="vals",
+            #             hue='metric',
+            #             palette=palette_div,
+            #             style='type')
+            # sns_plot.set(xlabel='Epochs',
+            # ylabel='Accuracy',
+            # title='Training/validation accuracies')
+            
+            # sns_plot.set_ylim(bottom=0, top=1) # this is to avoid Loss values (>1) to alter the graph limits
+            # sns_plot.xaxis.set_major_locator(ticker.MultipleLocator(2)) # adding ticks at multiples of 2
+            # sns_plot.xaxis.set_major_formatter(ticker.ScalarFormatter())
+            # sns_plot.get_figure().savefig(graph_output)
+            
+            # sns_plot.get_figure().savefig(graph_output)
+            # sns_plot.get_figure().show()
+
+            # print(f"Graph generated at : {graph_output}")
+            
+            # # # clearing up the figure for next plot
+            # sns_plot.get_figure().clf()
+            fig, ax1 = plt.subplots()
+            sns.lineplot(data=dfm_loss,
+                        x="epoch",
+                        y="vals",
+                        style='type',
+                        color = 'gray',
+                        legend=False)
+            ax1.set(xlabel='Epochs',
+                    ylabel='Accuracy',
+                    title='Training/validation accuracies')
+            ax1.xaxis.set_major_locator(ticker.MultipleLocator(1)) # adding ticks at multiples of 2
+            ax1.xaxis.set_major_formatter(ticker.ScalarFormatter())
+            # ax1.tick_params(axis='y')
+            ax1.set_ylabel('Loss', color='tab:grey')
+            ax1.grid(True, linestyle=':')
+            #  introducing second axis label
+            ax2 = ax1.twinx()
+            sns.lineplot(data=dfm,
                         x="epoch",
                         y="vals",
                         hue='metric',
                         palette=palette_div,
                         style='type')
-            sns_plot.set(xlabel='Epochs',
-            ylabel='Accuracy',
-            title='Training/validation accuracies')
+            # ax2.tick_params(axis='y')
+            ax2.set_ylabel('Accuracy')
+            ax2.set_ylim(bottom=0, top=1) # this is to avoid Loss values to alter the graph limits, but doesn't look good
             
-            sns_plot.set_ylim(bottom=0, top=1) # this is to avoid Loss values (>1) to alter the graph limits
-            sns_plot.xaxis.set_major_locator(ticker.MultipleLocator(2)) # adding ticks at multiples of 2
-            sns_plot.xaxis.set_major_formatter(ticker.ScalarFormatter())
-            sns_plot.get_figure().savefig(graph_output)
-            
-            sns_plot.get_figure().savefig(graph_output)
-            sns_plot.get_figure().show()
+            # sns_plot.get_figure().savefig(graph_output)
+            # # plt.show()
+            # sns_plot.get_figure().show()
 
+            plt.savefig(
+                f"{graph_output}"
+            )
             print(f"Graph generated at : {graph_output}")
+            plt.show()
             
-            # # clearing up the figure for next plot
-            sns_plot.get_figure().clf()
+            # print(f"Graph generated at : {graph_output}")
+
+            # # clearing up the figure for next plot to avoid overlapping figures! https://stackoverflow.com/questions/17106288/
+            # sns_plot.get_figure().clf()
+            plt.clf()
+            plt.cla()
+            plt.close()
 
 
     # ---
