@@ -47,8 +47,8 @@
     },
     "metrics":{
         "use_metrics":true,
-        "get_metrics_fn_names":["get_categorical_accuracy_fn", "get_precision_fn", "get_recall_fn", "get_onehotiou_fn" ],
-        "metrics_fn_parms":[{}, {}, {}, {}]
+        "get_metrics_fn_names":["get_categorical_accuracy_fn", "get_precision_fn", "get_recall_fn", "get_onehotiou_fn", "get_f1_score_fn" ],
+        "metrics_fn_parms":[{}, {}, {}, {}, {}]
     },
     "optimizer":{
         "get_optimizer_fn_name":"get_adam_optimizer",

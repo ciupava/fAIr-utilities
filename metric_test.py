@@ -496,7 +496,9 @@ def main():
             dfm['metric'] = np.where(dfm.col_names.str.contains("precision"), "Precision",
                             np.where(dfm.col_names.str.contains("recall"), "Recall",
                             np.where(dfm.col_names.str.contains("iou"), "IoU",
-                            np.where(dfm.col_names.str.contains("categorical"), "Accuracy", ""))))
+                            np.where(dfm.col_names.str.contains("categorical"), "Accuracy", 
+                            np.where(dfm.col_names.str.contains("f1"), "F1 score",
+                            "")))))
             #  ---
 
             # ---
@@ -551,21 +553,13 @@ def main():
             # ax2.tick_params(axis='y')
             ax2.set_ylabel('Accuracy')
             ax2.set_ylim(bottom=0, top=1) # this is to avoid Loss values to alter the graph limits, but doesn't look good
-            
-            # sns_plot.get_figure().savefig(graph_output)
-            # # plt.show()
-            # sns_plot.get_figure().show()
-
+            # 
             plt.savefig(
                 f"{graph_output}"
             )
             print(f"Graph generated at : {graph_output}")
             plt.show()
-            
-            # print(f"Graph generated at : {graph_output}")
-
             # # clearing up the figure for next plot to avoid overlapping figures! https://stackoverflow.com/questions/17106288/
-            # sns_plot.get_figure().clf()
             plt.clf()
             plt.cla()
             plt.close()
