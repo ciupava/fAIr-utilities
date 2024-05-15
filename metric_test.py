@@ -502,7 +502,8 @@ def main():
             #  ---
 
             # ---
-            palette_div=sns.color_palette("Dark2", 10)
+            # palette_div=sns.color_palette("Dark2", 10)
+            palette_div=sns.color_palette("CMRmap",6)
             sns.set_palette(palette_div)
             sns.set_style("whitegrid")
             # sns_plot = sns.lineplot(data=dfm,
@@ -531,8 +532,11 @@ def main():
             sns.lineplot(data=dfm_loss,
                         x="epoch",
                         y="vals",
-                        style='type',
+                        size='type',
+                        size_order=("valid", "train"),
                         color = 'gray',
+                        style='type',
+                        style_order=("valid", "train"),
                         legend=False)
             ax1.set(xlabel='Epochs',
                     ylabel='Accuracy',
@@ -549,7 +553,11 @@ def main():
                         y="vals",
                         hue='metric',
                         palette=palette_div,
-                        style='type')
+                        size = 'type',
+                        size_order=("valid", "train"),
+                        style='type',
+                        style_order=("valid", "train")
+                        )
             # ax2.tick_params(axis='y')
             ax2.set_ylabel('Accuracy')
             ax2.set_ylim(bottom=0, top=1) # this is to avoid Loss values to alter the graph limits, but doesn't look good
