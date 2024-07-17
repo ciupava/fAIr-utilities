@@ -540,17 +540,16 @@ def main():
 
 
     # ### Prediction
-    #  will be run in a second moment / separate script ?
     # # 
-    # # from hot_fair_utilities import predict
-    #     print(f"\n---\n---\nStarting prediction on {city}\n")
-    #     # prediction_output = f"{path_to_output}/{city}/prediction"   # !!! change file name here
-    #     prediction_output = "" #### NAME PATH HERE!!!!!!!!!!!!!!!!!!
-    #     predict(
-    #         checkpoint_path=final_model_path,
-    #         input_path=f"{city_path}/prediction/input", # the same of above?
-    #         prediction_path=prediction_output,
-    #     )
+    # from hot_fair_utilities import predict
+        print(f"\n---\n---\nStarting prediction on {city}\n")
+        # prediction_output = f"{path_to_output}/{city}/prediction"   # !!! change file name here
+        prediction_output = "" #### NAME PATH HERE!!!!!!!!!!!!!!!!!!
+        predict(
+            checkpoint_path=final_model_path,
+            input_path=f"{city_path}/prediction/input", # the same of above?
+            prediction_path=prediction_output,
+        )
 
     #### ------ Prediction metrics
 
