@@ -155,7 +155,7 @@ def main():
         print(f"---\nCity path is {city_path}\n---")
         print(f"---\nPreparing data for city {city}\n---")
         # obtain name of checkpoint file for batch size 8 (the third subfolder in train/model-checkpts/)
-        pattern_for_subdirs=f"{city_path}/train/model-checkpts/"
+        pattern_for_subdirs=f"{city_path}/train/model-checkpts"
         print(f"---\nPattern for subdirs is {pattern_for_subdirs}\n---")
         # subfolders_list = [fold.name for fold in os.scandir(pattern_for_subdirs) if fold.is_dir()]
         # print(f"\n---\{subfolders_list}")
@@ -163,20 +163,27 @@ def main():
         #     print(f"subdir is {subdirrr}")
         # for f in sorted(os.listdir(pattern_for_subdirs)): print(f)
         # subfolders_list = [sorted(os.listdir(pattern_for_subdirs))]
-        subfolders_list = [fold for fold in sorted(os.listdir(pattern_for_subdirs)) if not fold.startswith('.')]
+        subfolders_list = [fold for fold in sorted(os.listdir(pattern_for_subdirs)) if not fold.startswith('.')] # this is to avoid hidden folders/files to be listed (names starting wuth '.')
         print(f"Lis of model checkpoints subfolders: {subfolders_list}")
         #  getting the third one for batch size 8:
-        name_Iwant = subfolders_list[2]
+        name_Iwant = subfolders_list[2] # 3rd position item!
         print(name_Iwant)
+        checkpt_8batch_folder_path=f"{pattern_for_subdirs}/{name_Iwant}"
+        model_folder_name=os.listdir(checkpt_8batch_folder_path)[0] # [fold.name for fold in os.scandir(checkpt_8batch_folder_path) if fold.is_dir()]  #os.listdir(checkpt_8batch_folder_path)
+        print(f"model folder name {model_folder_name}")
+        final_model_path =f"{checkpt_8batch_folder_path}/{model_folder_name}"
+        print(f"Final model path: {final_model_path}")
+        
+        pred_input_path=f"{city_path}/train/pred-chips"
+        print(f"Prediction chips (rgb tiles): {pred_input_path}")
+        prediction_output = f"{metric_path}/predictions"
+        print(f"Prediction output path: {prediction_output}")
         
     # ### Prediction
     # # 
 
         print(f"\n---\n---\nStarting prediction on {city}\n")
         # prediction_output = f"{path_to_output}/{city}/prediction"   # !!! change file name here
-
-        pred_input_path=f"{city_path}/train/pred-chips"
-        prediction_output = "" #### NAME PATH HERE!!!!!!!!!!!!!!!!!!
         predict(
             checkpoint_path=final_model_path,
             # input_path=f"{city_path}/prediction/input", # the same of above?
