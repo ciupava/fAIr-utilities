@@ -6,16 +6,48 @@ from pathlib import Path
 
 # Third party imports
 import numpy as np
+import tensorflow as tf
 from tensorflow import keras
 
 from ..georeferencing import georeference
 from ..utils import remove_files
 from .utils import open_images, save_mask
 
+from ramp.training import (
+    callback_constructors,
+    loss_constructors,
+    metric_constructors,
+    model_constructors,
+    optimizer_constructors,
+)
+
 BATCH_SIZE = 8
 IMAGE_SIZE = 256
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
+
+class F1_Score(keras.metrics.Metric):
+    #  from https://stackoverflow.com/a/64477522
+    def __init__(self, class_id, name='f1_score', **kwargs):
+        super().__init__(name=name, **kwargs)
+        self.f1 = self.add_weight(name='f1', initializer='zeros')
+        self.precision_fn = tf.keras.metrics.Precision(class_id=1)
+        self.recall_fn = tf.keras.metrics.Recall(class_id=1)
+
+    def update_state(self, y_true, y_pred, sample_weight=None):
+        p = self.precision_fn(y_true, y_pred)
+        r = self.recall_fn(y_true, y_pred)
+        self.f1.assign(tf.math.divide_no_nan(2 * (p * r), (p + r)))
+
+    def result(self):
+        return self.f1
+
+    def reset_states(self):
+        # we also need to reset the state of the precision and recall objects
+        self.precision_fn.reset_states()
+        self.recall_fn.reset_states()
+        self.f1.assign(0)
+        
 
 def predict(
     checkpoint_path: str, input_path: str, prediction_path: str, confidence: float = 0.5
@@ -43,12 +75,15 @@ def predict(
     """
     start = time.time()
     print(f"Using: {checkpoint_path}")
-    model = keras.models.load_model(checkpoint_path)
+    # model = keras.models.load_model(checkpoint_path)
     # --- TO_DO: ----
     # changing this to tackle issue with error in loading model:
     # ValueError: Unable to restore custom object of class "F1_Score" (type _tf_keras_metric). Please make sure that this class is included in the `custom_objects` arg when calling `load_model()`. Also, check that the class implements `get_config` and `from_config`
-    # model = keras.models.load_model(checkpoint_path,
-    #                                 custom_objects={"F1_Score": tfa.metrics.F1Score})
+    model = keras.models.load_model(checkpoint_path,
+                                    custom_objects={"F1_Score":F1_Score(class_id=1)},
+                                    compile=False)
+    
+    
     # ---
     
     print(f"It took {round(time.time()-start)} sec to load model")

@@ -53,6 +53,14 @@ import hot_fair_utilities
 from hot_fair_utilities.training.cleanup import extract_highest_accuracy_model
 from hot_fair_utilities import predict
 
+from ramp.training import (
+    callback_constructors,
+    loss_constructors,
+    metric_constructors,
+    model_constructors,
+    optimizer_constructors,
+)
+
 # for the parser
 import argparse
 
@@ -73,39 +81,20 @@ def main():
         required=True,
         help=r"Name of txt file containing the list of training datasets",
     )
-    # parser.add_argument(
-    #     "-nep",
-    #     "--n_of_epochs",
-    #     type=int,
-    #     required=False,
-    #     default=2,
-    #     help="Number of epochs to train the model for",
-    # )
-    # parser.add_argument(
-    #     "-bch",
-    #     "--batch_size",
-    #     type=int,
-    #     nargs='+', # https://stackoverflow.com/questions/15753701/how-can-i-pass-a-list-as-a-command-line-argument-with-argparse
-    #     required=False,
-    #     default=5,
-    #     help="Batch size to train model",
-    # )
+    
     args = parser.parse_args()
 
-    # importing variables from command line
-    # n_of_epochs = args.n_of_epochs
-    # # n_of_batches = args.batch_size
-    # n_of_batches_array = args.batch_size
-
     list_filename =args.names_list
-
 
     ### defining path variables
     # base_path = "/Users/azanchetta/fAIr-utilities" # this path is used in all the rest of the code, so change accordingly
     base_path = f"{os.getcwd()}"
     # base_path = "/Users/azanchetta/fAIr_metric/"
     print(f"\n---\nCurrent working directory {base_path}")
-    metric_path = "/Users/azanchetta/fAIr_metric"
+    
+    #  --- FOR LOCAL MACHINE:
+    # metric_path = "/Users/azanchetta/fAIr_metric"
+    #  ---
 
     # check that training-datasets list file exists and is readable
     if not os.path.exists(f'{base_path}/{list_filename}'):
@@ -135,21 +124,15 @@ def main():
     
     for city in cities_list:
         # print(f"Now working on {city} preprocess")
-        city_path = f"{metric_path}/training_results/{city}" # make up string from base_path + city_name_from_list
-
+        
+        #  --- FOR LOCAL MACHINE:
+        # city_path = f"{metric_path}/training_results/{city}" # make up string from base_path + city_name_from_list
+        #  ---
+        city_path=f"{base_path}/ramp-data/metric_data/{city}"
     # ## Split training dataset to: training, validation, prediction sets ... it's been already split!!
     #     print(f"---\nSplitting the data training into training, validation and prediction datasets:\n")
     #     from hot_fair_utilities.training.prepare_data import split_training_2_validation_2_prediction
     #     x = split_training_2_validation_2_prediction(preprocess_output, train_output)
-
-    # # ---
-    # # TODO: add a call with `extract_highest_accuracy_model` to do cleanup
-    # # extract_highest_accuracy_model(model_path)
-    #     final_accuracy, final_model_path = extract_highest_accuracy_model(output_path)
-    #     print(f'\n-----\nFinal accuracy: {final_accuracy}')
-    #     print(f'\n-----\nFinal model path: {final_model_path}')
-    #     print('\n-----')
-    # # ---
     
     ### Prepare data and environment for prediction
         print(f"---\nCity path is {city_path}\n---")
@@ -157,13 +140,7 @@ def main():
         # obtain name of checkpoint file for batch size 8 (the third subfolder in train/model-checkpts/)
         pattern_for_subdirs=f"{city_path}/train/model-checkpts"
         print(f"---\nPattern for subdirs is {pattern_for_subdirs}\n---")
-        # subfolders_list = [fold.name for fold in os.scandir(pattern_for_subdirs) if fold.is_dir()]
-        # print(f"\n---\{subfolders_list}")
-        # for subdirrr in glob(pattern_for_subdirs, recursive=True):
-        #     print(f"subdir is {subdirrr}")
-        # for f in sorted(os.listdir(pattern_for_subdirs)): print(f)
-        # subfolders_list = [sorted(os.listdir(pattern_for_subdirs))]
-        subfolders_list = [fold for fold in sorted(os.listdir(pattern_for_subdirs)) if not fold.startswith('.')] # this is to avoid hidden folders/files to be listed (names starting wuth '.')
+        subfolders_list = [fold for fold in sorted(os.listdir(pattern_for_subdirs)) if not fold.startswith('.')] # this is to avoid hidden folders/files to be listed (names starting with '.')
         print(f"Lis of model checkpoints subfolders: {subfolders_list}")
         #  getting the third one for batch size 8:
         name_Iwant = subfolders_list[2] # 3rd position item!
@@ -176,7 +153,10 @@ def main():
         
         pred_input_path=f"{city_path}/train/pred-chips"
         print(f"Prediction chips (rgb tiles): {pred_input_path}")
-        prediction_output = f"{metric_path}/predictions"
+        #  --- FOR LOCAL MACHINE:
+        # prediction_output = f"{metric_path}/predictions"
+        # ---
+        prediction_output=f"{base_path}/predictions"
         print(f"Prediction output path: {prediction_output}")
         
     # ### Prediction
