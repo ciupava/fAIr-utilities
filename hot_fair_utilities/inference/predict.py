@@ -44,6 +44,13 @@ def predict(
     start = time.time()
     print(f"Using: {checkpoint_path}")
     model = keras.models.load_model(checkpoint_path)
+    # --- TO_DO: ----
+    # changing this to tackle issue with error in loading model:
+    # ValueError: Unable to restore custom object of class "F1_Score" (type _tf_keras_metric). Please make sure that this class is included in the `custom_objects` arg when calling `load_model()`. Also, check that the class implements `get_config` and `from_config`
+    # model = keras.models.load_model(checkpoint_path,
+    #                                 custom_objects={"F1_Score": tfa.metrics.F1Score})
+    # ---
+    
     print(f"It took {round(time.time()-start)} sec to load model")
     start = time.time()
 
