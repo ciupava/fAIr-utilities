@@ -25,5 +25,5 @@ def get_polygons(
     for tile, path in tqdm(tiles, unit="mask"):
         mask = np.array(Image.open(path).convert("P"), dtype=np.uint8)
         bldg_extract.extract(tile, mask)
-
+    print(f'polygons path {polygons_path} \n ----')
     bldg_extract.save(polygons_path)

@@ -47,10 +47,16 @@ class F1_Score(keras.metrics.Metric):
         self.precision_fn.reset_states()
         self.recall_fn.reset_states()
         self.f1.assign(0)
-        
+    # def get_config(self):
+    #     base_config = super(MyLayer, self).get_config()
+    #     base_config['output_dim'] = self.output_dim
+
+def get_f1_score_fn():
+    return F1_Score(class_id=1)
+
 
 def predict(
-    checkpoint_path: str, input_path: str, prediction_path: str, confidence: float = 0.5
+    checkpoint_path: str, input_path: str, prediction_path: str, confidence: float = 0.1
 ) -> None:
     """Predict building footprints for aerial images given a model checkpoint.
 
@@ -80,9 +86,12 @@ def predict(
     # changing this to tackle issue with error in loading model:
     # ValueError: Unable to restore custom object of class "F1_Score" (type _tf_keras_metric). Please make sure that this class is included in the `custom_objects` arg when calling `load_model()`. Also, check that the class implements `get_config` and `from_config`
     model = keras.models.load_model(checkpoint_path,
-                                    custom_objects={"F1_Score":F1_Score(class_id=1)},
+                                    # custom_objects={"f1_scoreee":get_f1_score_fn()},
                                     compile=False)
-    
+    # model.compile(
+    #             # loss='categorical_crossentropy',
+    #               metrics=['categorical_accuracy','f1_score','precision_1', 'recall_1', 'ohe_iou'])
+    # # model.evaluate()
     
     # ---
     
@@ -92,7 +101,7 @@ def predict(
     os.makedirs(prediction_path, exist_ok=True)
     print(f'prediction path {prediction_path}')
     image_paths = glob(f"{input_path}/*.tif")
-    print(f'image path{image_paths}')
+    # print(f'image path {image_paths}')
     for i in range((len(image_paths) + BATCH_SIZE - 1) // BATCH_SIZE):
         image_batch = image_paths[BATCH_SIZE * i : BATCH_SIZE * (i + 1)]
         print(f'image batch {image_batch}')
@@ -100,6 +109,7 @@ def predict(
         images = images.reshape(-1, IMAGE_SIZE, IMAGE_SIZE, 3)
 
         preds = model.predict(images)
+        print(f'one step done ---- CHECK ----- \n __________________________')
         preds = np.argmax(preds, axis=-1)
         preds = np.expand_dims(preds, axis=-1)
         preds = np.where(

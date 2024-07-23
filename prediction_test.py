@@ -36,7 +36,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-
+import shutil
 
 import cv2
 import warnings
@@ -52,6 +52,7 @@ import hot_fair_utilities
 # from hot_fair_utilities import preprocess, predict, polygonize
 from hot_fair_utilities.training.cleanup import extract_highest_accuracy_model
 from hot_fair_utilities import predict
+from hot_fair_utilities import polygonize
 
 from ramp.training import (
     callback_constructors,
@@ -63,6 +64,27 @@ from ramp.training import (
 
 # for the parser
 import argparse
+
+def iou_metric(truth, pred, divide=False, eval_class=(1,)):
+    """
+    Compute IoU, i.e., jaccard index
+    :param truth: truth data matrix, should be H*W
+    :param pred: prediction data matrix, should be the same dimension as the truth data matrix
+    :param divide: if True, will return the IoU, otherwise return the numerator and denominator
+    :param eval_class: the label class to be evaluated
+    :return:
+    """
+    truth = truth.flatten()
+    pred = pred.flatten()
+    iou_score = np.zeros((2, len(eval_class)), dtype=float)
+    for c_cnt, curr_class in enumerate(eval_class):
+        iou_score[0, c_cnt] += np.sum(((truth == curr_class) * (pred == curr_class)) == 1)
+        iou_score[1, c_cnt] += np.sum(((truth == curr_class) + (pred == curr_class)) >= 1)
+    if not divide:
+        return iou_score
+    else:
+        return np.mean(iou_score[0, :] / iou_score[1, :])
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -156,9 +178,17 @@ def main():
         #  --- FOR LOCAL MACHINE:
         # prediction_output = f"{metric_path}/predictions"
         # ---
-        prediction_output=f"{base_path}/predictions"
-        print(f"Prediction output path: {prediction_output}")
+        prediction_base_output=f"{base_path}/ramp-data/predictions"
+        print(f"Prediction output path: {prediction_base_output}")
         
+        # generate folder for each city with predictions:
+        city_dir = f"{prediction_base_output}/{city}"
+        if os.path.exists(city_dir):
+            print(f"City folder {city_dir} already exist, I am removing it and re-creating it")
+            shutil.rmtree(city_dir)
+            os.makedirs(city_dir)
+        # os.mkdir(os.path.join(prediction_base_output,city))
+        prediction_output = city_dir
     # ### Prediction
     # # 
 
@@ -166,12 +196,11 @@ def main():
         # prediction_output = f"{path_to_output}/{city}/prediction"   # !!! change file name here
         predict(
             checkpoint_path=final_model_path,
-            # input_path=f"{city_path}/prediction/input", # the same of above?
             input_path=pred_input_path,
             prediction_path=prediction_output
         )
 
-    #### ------ Prediction metrics
+#### ------ Polygonization
 
     # # from hot_fair_utilities import polygonize
     #     print(f"\n---\n---\nStarting polygonise result on {city}\n")
@@ -181,6 +210,9 @@ def main():
     #         output_path=geojson_output,
     #         remove_inputs = False,
     #     )
+
+
+#### ------ Prediction metrics
 
 
 
