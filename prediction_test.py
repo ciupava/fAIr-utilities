@@ -65,25 +65,7 @@ from ramp.training import (
 # for the parser
 import argparse
 
-def iou_metric(truth, pred, divide=False, eval_class=(1,)):
-    """
-    Compute IoU, i.e., jaccard index
-    :param truth: truth data matrix, should be H*W
-    :param pred: prediction data matrix, should be the same dimension as the truth data matrix
-    :param divide: if True, will return the IoU, otherwise return the numerator and denominator
-    :param eval_class: the label class to be evaluated
-    :return:
-    """
-    truth = truth.flatten()
-    pred = pred.flatten()
-    iou_score = np.zeros((2, len(eval_class)), dtype=float)
-    for c_cnt, curr_class in enumerate(eval_class):
-        iou_score[0, c_cnt] += np.sum(((truth == curr_class) * (pred == curr_class)) == 1)
-        iou_score[1, c_cnt] += np.sum(((truth == curr_class) + (pred == curr_class)) >= 1)
-    if not divide:
-        return iou_score
-    else:
-        return np.mean(iou_score[0, :] / iou_score[1, :])
+
 
 
 def main():
@@ -213,8 +195,13 @@ def main():
 
 
 #### ------ Prediction metrics
-
-    
+    inference_image = ''
+    metrics_list = ["categorical_accuracy_fn", "precision_fn", "recall_fn", "f1_score_fn", "iou_fn" ]
+    for metric in metrics_list:
+        truth = ''
+        pred = ''
+        metric_value = metric(truth, pred)
+        
 
 
 if __name__ == "__main__":

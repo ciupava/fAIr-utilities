@@ -26,6 +26,8 @@ IMAGE_SIZE = 256
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 
 
+
+#  --- adding this when tried to solve the issue with load.model
 class F1_Score(keras.metrics.Metric):
     #  from https://stackoverflow.com/a/64477522
     def __init__(self, class_id, name='f1_score', **kwargs):
@@ -54,6 +56,36 @@ class F1_Score(keras.metrics.Metric):
 def get_f1_score_fn():
     return F1_Score(class_id=1)
 
+
+# ---
+# --- adding metrics for inference
+
+def sparse_categorical_accuracy_fn():
+    return tf.keras.metrics.SparseCategoricalAccuracy()
+
+def categorical_accuracy_fn():
+    return tf.keras.metrics.CategoricalAccuracy()
+
+def iou_fn():
+    return tf.keras.metrics.IoU(
+        num_classes= 2,
+        target_class_ids= [0, 1],
+        name="iou")
+
+def precision_fn():
+    return tf.keras.metrics.Precision(
+        # E.g. buildings
+        class_id=1,
+        name="precision_1")
+
+def recall_fn():
+    return tf.keras.metrics.Recall(
+        # E.g. buildings
+        class_id=1,
+        name="recall_1")
+
+def f1score_fn():
+    return F1_Score(class_id=1)
 
 def predict(
     checkpoint_path: str, input_path: str, prediction_path: str, confidence: float = 0.1
