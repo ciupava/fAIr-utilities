@@ -3,34 +3,34 @@
 #1_Zanzibar
 #2_Kampala
 #4_Salvacion
-# --- first batch:
+# --- first batch (8):
 model51_td364
-#model97_td372
-#model95_td370
-#model110_td394
-#model112_td397
-#model98_td373
-#model113_td398
-#model114_td399
-# --- second batch:
-#model134_td456
-#model102_td391
-#model135_td459
-#model137_td463
-#model136_td462
-# --- third batch:
-#model148_td488
-#model147_td485
-#model149_td489
-# --- fourth batch:
-#model108_td529
+model97_td372
+model95_td370
+model110_td394
+model112_td397
+model98_td373
+model113_td398
+model114_td399
+# --- second batch (5):
+model134_td456
+model102_td391
+model135_td459
+model137_td463
+model136_td462
+# --- third batch (3):
+model148_td488
+model147_td485
+model149_td489
+# --- fourth batch (9):
+model108_td529
 #model139_td467 --- NO NO GOOD
-#model158_td508
-#model163_td523
-#model162_td530
-#model165_td525
-#model164_td524
-#model166_td526
-#model167_td528
+model158_td508
+model163_td523
+model162_td530
+model165_td525
+model164_td524
+model166_td526
+model167_td528
 # adding 25th model in place of 139
-#model168_td539
+model168_td539

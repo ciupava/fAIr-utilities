@@ -194,15 +194,5 @@ def main():
     #     )
 
 
-#### ------ Prediction metrics
-    inference_image = ''
-    metrics_list = ["categorical_accuracy_fn", "precision_fn", "recall_fn", "f1_score_fn", "iou_fn" ]
-    for metric in metrics_list:
-        truth = ''
-        pred = ''
-        metric_value = metric(truth, pred)
-        
-
-
 if __name__ == "__main__":
     main()
