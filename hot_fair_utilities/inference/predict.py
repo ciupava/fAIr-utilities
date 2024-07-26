@@ -58,7 +58,7 @@ def get_f1_score_fn():
 
 
 def predict(
-    checkpoint_path: str, input_path: str, prediction_path: str, confidence: float = 0.1
+    checkpoint_path: str, input_path: str, prediction_path: str, confidence: float = 0.5
 ) -> None:
     """Predict building footprints for aerial images given a model checkpoint.
 
