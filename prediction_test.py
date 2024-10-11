@@ -141,29 +141,29 @@ def main():
     ### Prepare data and environment for prediction
         print(f"---\nCity path is {city_path}\n---")
         print(f"---\nPreparing data for city {city}\n---")
-        # # obtain name of checkpoint file for batch size 8 (the third subfolder in train/model-checkpts/)
-        # pattern_for_subdirs=f"{city_path}/train/model-checkpts"
-        # print(f"---\nPattern for subdirs is {pattern_for_subdirs}\n---")
-        # subfolders_list = [fold for fold in sorted(os.listdir(pattern_for_subdirs)) if not fold.startswith('.')] # this is to avoid hidden folders/files to be listed (names starting with '.')
-        # print(f"Lis of model checkpoints subfolders: {subfolders_list}")
-        # #  getting the third one for batch size 8:
-        # name_Iwant = subfolders_list[2] # 3rd position item!
-        # print(name_Iwant)
-        # checkpt_8batch_folder_path=f"{pattern_for_subdirs}/{name_Iwant}"
-        # model_folder_name=os.listdir(checkpt_8batch_folder_path)[0] # [fold.name for fold in os.scandir(checkpt_8batch_folder_path) if fold.is_dir()]  #os.listdir(checkpt_8batch_folder_path)
-        # print(f"model folder name {model_folder_name}")
-        # final_model_path =f"{checkpt_8batch_folder_path}/{model_folder_name}"
-        # print(f"Final model path: {final_model_path}")
-        
-        # --- nairobi poster, temporary!!
-        final_model_path="/home/annazan/fAIr-utilities/ramp-code/ramp/checkpoint.tf"
+        # obtain name of checkpoint file for batch size 8 (the third subfolder in train/model-checkpts/)
+        pattern_for_subdirs=f"{city_path}/train/model-checkpts"
+        print(f"---\nPattern for subdirs is {pattern_for_subdirs}\n---")
+        subfolders_list = [fold for fold in sorted(os.listdir(pattern_for_subdirs)) if not fold.startswith('.')] # this is to avoid hidden folders/files to be listed (names starting with '.')
+        print(f"Lis of model checkpoints subfolders: {subfolders_list}")
+        #  getting the third one for batch size 8:
+        name_Iwant = subfolders_list[2] # 3rd position item!
+        print(name_Iwant)
+        checkpt_8batch_folder_path=f"{pattern_for_subdirs}/{name_Iwant}"
+        model_folder_name=os.listdir(checkpt_8batch_folder_path)[0] # [fold.name for fold in os.scandir(checkpt_8batch_folder_path) if fold.is_dir()]  #os.listdir(checkpt_8batch_folder_path)
+        print(f"model folder name {model_folder_name}")
+        final_model_path =f"{checkpt_8batch_folder_path}/{model_folder_name}"
         print(f"Final model path: {final_model_path}")
-        # pred_input_path="/home/annazan/fAIr-utilities/ramp-data/metric_data/nairobi5/chips"
-        pred_input_path="/home/annazan/fAIr-utilities/ramp-data/metric_data/nairobi2/"
-        # --- end of nairobi
+        
+        # # --- nairobi poster, temporary!!
+        # final_model_path="/home/annazan/fAIr-utilities/ramp-code/ramp/checkpoint.tf"
+        # print(f"Final model path: {final_model_path}")
+        # # pred_input_path="/home/annazan/fAIr-utilities/ramp-data/metric_data/nairobi5/chips"
+        # pred_input_path="/home/annazan/fAIr-utilities/ramp-data/metric_data/nairobi2/"
+        # # --- end of nairobi
         
         
-        # pred_input_path=f"{city_path}/train/pred-chips"
+        pred_input_path=f"{city_path}/train/pred-chips"
         print(f"Prediction chips (rgb tiles): {pred_input_path}")
         #  --- FOR LOCAL MACHINE:
         # prediction_output = f"{metric_path}/predictions"
@@ -193,13 +193,13 @@ def main():
 #### ------ Polygonization
 
     # # from hot_fair_utilities import polygonize
-    #     print(f"\n---\n---\nStarting polygonise result on {city}\n")
-    #     geojson_output= f"{prediction_output}/prediction.geojson"
-    #     polygonize(
-    #         input_path=prediction_output, 
-    #         output_path=geojson_output,
-    #         remove_inputs = False,
-    #     )
+        print(f"\n---\n---\nStarting polygonise result on {city}\n")
+        geojson_output= f"{prediction_output}/prediction.geojson"
+        polygonize(
+            input_path=prediction_output, 
+            output_path=geojson_output,
+            remove_inputs = False,
+        )
 
 
 if __name__ == "__main__":
