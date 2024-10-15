@@ -2,11 +2,11 @@
 import os
 from pathlib import Path
 
-from .get_polygons import get_polygons
+from .get_polygons import get_polygons, get_zoom_level
 from .merge_polygons import merge_polygons
 
 
-def polygonize(input_path: str, output_path: str, remove_inputs: False) -> None:
+def polygonize(input_path: str, temp_path: str, output_path: str, zoom_levels, remove_inputs: False) -> None:
     """Polygonize raster tiles from the input path using AutoBFE's algorithm.
 
     There are two steps:
@@ -32,10 +32,21 @@ def polygonize(input_path: str, output_path: str, remove_inputs: False) -> None:
         os.remove(output_path)
     base_path = Path(output_path).parents[0]
     base_path.mkdir(exist_ok=True, parents=True)
+    
+    # print(f"input path is {input_path}")
+    # zoom_level = get_zoom_level(input_path)
+    # unique_zoom_levels = list(set(zoom_levels))
+    print(f"___Zoom level is {zoom_levels}")
+    # for z in unique_zoom_levels:
+    #     print(z)
+    get_polygons(input_path, temp_path, zoom_levels, kernel_opening=1)
+    # get_polygons(input_path, "temp-labels.geojson", unique_zoom_levels, kernel_opening=1)
+    print(f"---\nOutput path is: {output_path}")
 
-    get_polygons(input_path, "temp-labels.geojson", kernel_opening=1)
-    merge_polygons("temp-labels.geojson", output_path, distance_threshold=0.6)
-    os.remove("temp-labels.geojson")
+    # json_name = "temp-labels.geojson"
+    merge_polygons(temp_path, output_path, distance_threshold=0.6)
+    os.remove(temp_path)
+    print(f"removing {temp_path} here !!!\n---\n")
 
     if remove_inputs:
         # Get a list of all .tif files in the directory

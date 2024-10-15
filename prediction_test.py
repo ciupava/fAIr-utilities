@@ -169,7 +169,7 @@ def main():
         # prediction_output = f"{metric_path}/predictions"
         # ---
         prediction_base_output=f"{base_path}/ramp-data/predictions"
-        print(f"Prediction output path: {prediction_base_output}")
+        # print(f"Prediction output path: {prediction_base_output}")
         
         # generate folder for each city with predictions:
         city_dir = f"{prediction_base_output}/{city}"
@@ -179,11 +179,13 @@ def main():
             os.makedirs(city_dir)
         # os.mkdir(os.path.join(prediction_base_output,city))
         prediction_output = city_dir
-    # ### Prediction
-    # # 
+        print(f"prediction output {prediction_output}")
+        
+### ------- Prediction
 
         print(f"\n---\n---\nStarting prediction on {city}\n")
         # prediction_output = f"{path_to_output}/{city}/prediction"   # !!! change file name here
+        
         predict(
             checkpoint_path=final_model_path,
             input_path=pred_input_path,
@@ -192,14 +194,22 @@ def main():
 
 #### ------ Polygonization
 
-    # # from hot_fair_utilities import polygonize
-        print(f"\n---\n---\nStarting polygonise result on {city}\n")
-        geojson_output= f"{prediction_output}/prediction.geojson"
-        polygonize(
-            input_path=prediction_output, 
-            output_path=geojson_output,
-            remove_inputs = False,
-        )
+        print(f"\n---\n---\nStarting polygonise result of {city}\n")
+        # add zoom level information for each prediction tile
+        # geojson_output= f"{prediction_output}/prediction.geojson"
+        zoom_list=[19,20,21]
+        for zoom in zoom_list:
+            print(f"input zOOOOOm {zoom}")
+            # geojson_temp_output=f"{prediction_output}/prediction_temp{zoom}.geojson"
+            geojson_temp_output="temp-labels.geojson"
+            geojson_output=f"{prediction_output}/prediction_{zoom}.geojson"
+            polygonize(
+                input_path=prediction_output, 
+                temp_path=geojson_temp_output,
+                output_path=geojson_output,
+                zoom_levels = zoom,
+                remove_inputs = False
+                )
 
 
 if __name__ == "__main__":

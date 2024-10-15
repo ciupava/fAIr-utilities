@@ -103,7 +103,7 @@ def predict(
     os.makedirs(prediction_path, exist_ok=True)
     print(f'prediction path {prediction_path}')
     image_paths = glob(f"{input_path}/*.tif")
-    # print(f'image path {image_paths}')
+    
     for i in range((len(image_paths) + BATCH_SIZE - 1) // BATCH_SIZE):
         image_batch = image_paths[BATCH_SIZE * i : BATCH_SIZE * (i + 1)]
         print(f'image batch {image_batch}')

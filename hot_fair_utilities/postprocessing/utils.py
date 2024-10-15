@@ -22,12 +22,29 @@ def tiles_from_directory(dir_path):
     Yields:
       The mercantile tiles and file paths
     """
-    for path in glob(f"{dir_path}/*"):
+    for path in glob(f"{dir_path}/*.tif"):
         _, *tile_info = re.split("-", Path(path).stem)
+        print(f"tile info is {tile_info}")
         x, y, z = map(int, tile_info)
         tile = mercantile.Tile(x=x, y=y, z=z)
         yield tile, path
 
+def zoom_from_directory(dir_path):
+    """Loads files from a directory
+    Adapted from: https://github.com/mapbox/robosat
+
+    Args:
+      root: the  directory with files that have a name with OAM structure "OAM-x-y-z.*""
+
+    Yields:
+      The mercantile tiles and file paths
+    """
+    for path in glob(f"{dir_path}/*"):
+        _, *tile_info = re.split("-", Path(path).stem)
+        x, y, z = map(int, tile_info)
+        tile = mercantile.Tile(x=x, y=y, z=z)
+        zoom = z
+        return zoom
 
 def opening(mask, kernel_size):
     """Morphologycal transforations of erosion the dilatation which removes small objects

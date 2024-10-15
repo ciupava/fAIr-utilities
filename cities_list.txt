@@ -4,7 +4,7 @@
 #2_Kampala
 #4_Salvacion
 ## --- first batch (8):
-#model51_td364
+model51_td364
 #model97_td372
 #model110_td394
 #model95_td370
@@ -33,6 +33,4 @@
 #model164_td524
 #model167_td528
 ## --- adding 25th model in place of 139
-model168_td539
-## nairobi for sotm
-#nairobi7
+#model168_td539
