@@ -1,0 +1,28 @@
+name: fair-conda
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - numpy
+  - gdal
+  - bumpver
+  - black
+  - isort
+  - build
+  - twine
+  - pip
+  - pip:
+    - geopandas
+    - mercantile
+    - opencv-python
+    - opencv-python-headless
+    - pandas
+    - Pillow
+    - ramp-fair==0.1.2
+    - rasterio
+    - rtree
+    - shapely
+    - torchivision
+    - torchaudio
+    - tqdm
+    - ultralytics==8.3.26
