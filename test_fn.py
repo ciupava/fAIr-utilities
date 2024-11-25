@@ -1,3 +1,14 @@
+# Standard library imports
+import glob
+import os
+
+# Third party imports
+import numpy as np
+import yaml
+from tqdm import tqdm
+import shutil
+from .utils import convert_tif_to_jpg, write_yolo_file
+
 
 def find_files():
     """
@@ -22,7 +33,7 @@ def find_files():
     for folder in data_folders:
         print(f'folder is {folder}')
         # Pattern to match all .tif files in the current folder, including subdirectories
-        tif_pattern = f"{folder}/**/**/**/*.tif".        print(f'found tif files {found_tif_files}')
+        tif_pattern = f"{folder}/**/**/**/*.tif"
         print(f'tif pattern is {tif_pattern}')
         print(len(tif_pattern))
         # Find all .tif files in the current 'training*' folder and its subdirectories
@@ -35,7 +46,7 @@ def find_files():
                 cwps.append(file)
 
         # Pattern to match all .geojson files in the current folder, including subdirectories
-        geojson_pattern = f"{folder}/**/**/**/*.geojson".        print(f'found tif files {found_tif_files}')
+        geojson_pattern = f"{folder}/**/**/**/*.geojson"
         print(f'geojson pattern is {geojson_pattern}')
         print(len(geojson_pattern))
         # Find all .geojson files
@@ -70,3 +81,4 @@ print('Found {} label files\n'.format(len(lwps)))
 
 # Print message if all filenames match
 print('All filenames match; each tif has a label!')
+

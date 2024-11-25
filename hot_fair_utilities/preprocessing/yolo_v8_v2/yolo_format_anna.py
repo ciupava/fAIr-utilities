@@ -12,7 +12,8 @@ from .utils import convert_tif_to_jpg, write_yolo_file
 
 def yolo_format(
     input_path="preprocessed/*",
-    output_path="ramp_data_yolo"
+    output_path="ramp_data_yolo",
+    city=""
     # seed=42,
     # train_split=0.7,
     # val_split=0.15,
@@ -34,13 +35,12 @@ def yolo_format(
     """
 
 
-# Add part to loop into all the cities list
 # Add part to obtain dataset split from the existing files structure
 
     # Call the find_files function and print the number of found files
-    cwps_train, lwps_train, base_folders = find_files(city_folder_name, "train")
-    cwps_val, lwps_val, base_folders = find_files(city_folder_name, "val")
-    cwps_pred, lwps_pred, base_folders = find_files(city_folder_name, "pred")
+    cwps_train, lwps_train = find_files(city_folder_name, "train")
+    cwps_val, lwps_val = find_files(city_folder_name, "val")
+    cwps_pred, lwps_pred = find_files(city_folder_name, "pred")
 
     print('Found {} chip files'.format(len(cwps_train)+len(cwps_val)+len(cwps_pred)))
     # N = 2
@@ -52,13 +52,14 @@ def yolo_format(
     # Print message if all filenames match
     # print('All filenames match; each tif has a label!')
 
-    # Call the shapes_data and print the shape of the first chip file
-    shapes_data_train = check_shapes(cwps_train)
-    print(f'Chip shapes with counts are: {shapes_data_train[0]}')
-    shapes_data_val = check_shapes(cwps_val)
-    print(f'Chip shapes with counts are: {shapes_data_val[0]}')
-    shapes_data_pred = check_shapes(cwps_pred)
-    print(f'Chip shapes with counts are: {shapes_data_pred[0]}')
+    # Kshitij is skipping this part below, so do I
+    # # Call the shapes_data and print the shape of the first chip file
+    # shapes_data_train = check_shapes(cwps_train)
+    # print(f'Chip shapes with counts are: {shapes_data_train[0]}')
+    # shapes_data_val = check_shapes(cwps_val)
+    # print(f'Chip shapes with counts are: {shapes_data_val[0]}')
+    # shapes_data_pred = check_shapes(cwps_pred)
+    # print(f'Chip shapes with counts are: {shapes_data_pred[0]}')
 
     # Bringing here the relevant parts from next cell, as we need to keep iterating through the city folders
     train_cwps = cwps_train
@@ -83,30 +84,30 @@ def yolo_format(
         # Write the YOLO label files for the training set
         print('Generating training labels')
         for train_cwp in tqdm(train_cwps):
-            write_yolo_file(train_cwp, city_folder=city, folder_type='train')
+            write_yolo_file(train_cwp, city_folder=city, folder_type='train', output_path=output_path)
 
         # Write the YOLO label files for the validation set
         print('Generating validation labels')
         for val_cwp in tqdm(val_cwps):
-            write_yolo_file(val_cwp, city_folder=city, folder_type='val')
+            write_yolo_file(val_cwp, city_folder=city, folder_type='val', output_path=output_path)
 
         # Write the YOLO label files for the test set
         print('Generating test labels')
         for test_cwp in tqdm(test_cwps):
-            write_yolo_file(test_cwp, city_folder=city, folder_type='test')
+            write_yolo_file(test_cwp, city_folder=city, folder_type='test', output_path=output_path)
 
         # Convert the chip files to JPEG format
         print('Generating training images')
         for train_cwp in tqdm(train_cwps):
-            convert_tif_to_jpg(train_cwp, city_folder=city, folder_type='train')
+            convert_tif_to_jpg(train_cwp, city_folder=city, folder_type='train', output_path=output_path)
 
         print('Generating validation images')
         for val_cwp in tqdm(val_cwps):
-            convert_tif_to_jpg(val_cwp, city_folder=city, folder_type='val')
+            convert_tif_to_jpg(val_cwp, city_folder=city, folder_type='val', output_path=output_path)
 
         print('Generating test images')
         for test_cwp in tqdm(test_cwps):
-            convert_tif_to_jpg(test_cwp, city_folder=city, folder_type='test')
+            convert_tif_to_jpg(test_cwp, city_folder=city, folder_type='test', output_path=output_path)
 
     else:
         print('Data already converted')
@@ -171,4 +172,4 @@ def find_files():
 
         base_folders.append(cwp.split('/')[1])
 
-    return cwps, lwps, base_folders
+    return cwps, lwps

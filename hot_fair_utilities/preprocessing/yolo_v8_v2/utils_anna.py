@@ -204,7 +204,7 @@ def convert_coordinates(coordinates, geo_dict):
 
 
 
-def write_yolo_file(iwp, folder, output_path, class_index=0):
+def write_yolo_file(iwp, city_folder, folder_type, output_path, class_index=0):
     """
     Writes YOLO label file based on the given image with path and class index.
 
@@ -221,7 +221,8 @@ def write_yolo_file(iwp, folder, output_path, class_index=0):
     lwp = iwp.replace(".tif", ".geojson").replace("chips", "labels")
 
     # Create the YOLO label filename with path from the chip filename with path
-    ywp = os.path.join(output_path,'labels',folder, os.path.basename(iwp).replace(".tif", ".txt"))
+    # ywp = os.path.join(output_path,'labels',folder, os.path.basename(iwp).replace(".tif", ".txt"))
+    ywp = os.path.join(output_path,city_folder,folder_type,'labels',os.path.basename(iwp).replace(".tif", ".txt"))
     # Create the YOLO label folder if it does not exist
     os.makedirs(os.path.dirname(ywp), exist_ok=True)
 
@@ -307,73 +308,3 @@ def convert_tif_to_jpg(cwp, folder, output_path, quality_level=100):
 
         # Print the output path
         return f"Writing: {jwp}"
-
-def write_yolo_file_city(iwp, folder, output_path, class_index=0):
-    """
-    Writes YOLO label file based on the given image with path and class index.
-
-    Args:
-        iwp (str): The image with path.
-        output_path(path) : output path for the yolo label file
-        class_index (int, optional): The class index for the YOLO label. Defaults to 0.
-
-    Returns:
-        None
-    """
-
-    # Get the GeoJSON filename with path from the chip filename with path
-    lwp = iwp.replace(".tif", ".geojson").replace("chips", "labels")
-
-    # Create the YOLO label filename with path from the chip filename with path
-    ywp = os.path.join(output_path,'labels',folder, os.path.basename(iwp).replace(".tif", ".txt"))
-    # Create the YOLO label folder if it does not exist
-    os.makedirs(os.path.dirname(ywp), exist_ok=True)
-
-    # Remove the YOLO label file if it already exists
-    if os.path.exists(ywp):
-        os.remove(ywp)
-
-    # Fetch the chip's Exif data
-    geo_dict = get_geo_data(iwp)
-
-    # Open the GeoJSON file
-    with open(lwp, "r") as file:
-        data = json.load(file)
-
-    # Initialize the polygon count
-    polygon_count = 0
-
-    # Navigate through the GeoJSON structure
-    for feature in data["features"]:
-        if feature["geometry"]["type"] == "Polygon":
-            # Increment the polygon count
-            polygon_count += 1
-
-            # Get the coordinates of the polygon
-            coordinates = feature["geometry"]["coordinates"]
-
-            # Convert the coordinates
-            new_coordinates = flatten_list(convert_coordinates(coordinates, geo_dict))
-            new_coordinate_str = " ".join(map(str, flatten_list(new_coordinates)))
-
-            # Write the converted coordinates to a file
-            with open(ywp, "a+") as file:
-                # Move the file pointer to the start of the file to check its contents.
-                file.seek(0)  # Go to the beginning of the file
-                first_character = file.read(
-                    1
-                )  # Read the first character to determine if the file is empty
-
-                # If the first character does not exist, the file is empty
-                if not first_character:
-                    # Write the first string without a new line before it
-                    file.write(f"{class_index} " + new_coordinate_str)
-
-                else:
-                    # The file is not empty, write the new string on a new line
-                    file.write(f"\n{class_index} " + new_coordinate_str)
-
-    if polygon_count == 0:
-        # Open the file in write mode, which creates a new file if it doesn't exist
-        with open(ywp, "w") as file:
-            pass  # No need to write anything, just creating the file
