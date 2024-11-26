@@ -268,17 +268,9 @@ def compute_iou_chart_from_yolo_results(results_csv_path,results_output_chart_pa
     data['IoU(M)'] = 1 / (
         1 / data['metrics/precision(M)'] + 1 / data['metrics/recall(M)'] - 1
     )
+    chart = data.plot(x='epoch',y='IoU(M)',title='IoU (Mask) per Epoch',xticks=data['epoch'].astype(int)).get_figure()
 
-    plt.figure(figsize=(10, 5))
-    plt.plot(data['epoch'], data['IoU(M)'], label='IoU (Mask)')
-    plt.xlabel('Epoch')
-    plt.xticks(data['epoch'].astype(int))
-    plt.ylabel('IoU')
-    plt.title('IoU over Epochs')
-    plt.legend()
-    plt.grid()
-
-    plt.savefig(results_output_chart_path)
+    chart.savefig(results_output_chart_path)
     return results_output_chart_path
 
 
@@ -296,3 +288,11 @@ def get_yolo_iou_metrics(model_path):
     )  # ref here https://github.com/ultralytics/ultralytics/issues/9984#issuecomment-2422551315
     final_accuracy = iou_accuracy * 100
     return final_accuracy
+
+
+
+def export_model_to_onnx(model_path):
+    model = ultralytics.YOLO(model_path)
+    model.export(format='onnx',imgsz=[256,256])
+    # model.export(format='tflite')
+    return True

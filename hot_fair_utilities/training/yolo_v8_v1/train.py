@@ -7,13 +7,14 @@ from pathlib import Path
 import torch
 import ultralytics
 
+
 # Reader imports
 from hot_fair_utilities.model.yolo import YOLOSegWithPosWeight
-from ...utils import compute_iou_chart_from_yolo_results, get_yolo_iou_metrics
+from ...utils import compute_iou_chart_from_yolo_results, get_yolo_iou_metrics,export_model_to_onnx
 # Get environment variables with fallbacks
-ROOT = Path(os.getenv("YOLO_ROOT", Path(__file__).parent.absolute()))
-DATA_ROOT = str(Path(os.getenv("YOLO_DATA_ROOT", ROOT / "yolo-training")))
-LOGS_ROOT = str(Path(os.getenv("YOLO_LOGS_ROOT", ROOT / "checkpoints")))
+# ROOT = Path(os.getenv("YOLO_ROOT", Path(__file__).parent.absolute()))
+# DATA_ROOT = str(Path(os.getenv("YOLO_DATA_ROOT", ROOT / "yolo-training")))
+# LOGS_ROOT = str(Path(os.getenv("YOLO_LOGS_ROOT", ROOT / "checkpoints")))
 
 # Different hyperparameters from default in YOLOv8 release models
 # https://github.com/ultralytics/ultralytics/blob/main/ultralytics/cfg/default.yaml
@@ -118,6 +119,8 @@ def train(
         epochs=int(epochs),
         resume=resume,
         deterministic=False,
+        verbose=True,
+        save_dir= os.path.join(output_path),
         device=[int(i) for i in gpu.split(",")] if "," in gpu else gpu,
         **kwargs,
     )
@@ -126,6 +129,7 @@ def train(
     output_model_path=os.path.join(os.path.join(output_path,"checkpoints"), name, "weights", "best.pt")
 
     iou_model_accuracy=get_yolo_iou_metrics(output_model_path)
+    export_model_to_onnx(output_model_path)
 
     return  output_model_path,iou_model_accuracy
 
