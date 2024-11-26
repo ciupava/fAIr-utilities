@@ -11,13 +11,10 @@ from .utils import convert_tif_to_jpg, write_yolo_file
 
 
 def yolo_format(
-    input_path="preprocessed/*",
+    # input_path="preprocessed/*",
+    input_path="",
     output_path="ramp_data_yolo",
     city=""
-    # seed=42,
-    # train_split=0.7,
-    # val_split=0.15,
-    # test_split=0.15,
 ):
     """
     Preprocess data for YOLO model training.
@@ -34,13 +31,14 @@ def yolo_format(
         None
     """
 
+    preprocessed_input = f'{input}/{city}'
 
 # Add part to obtain dataset split from the existing files structure
 
     # Call the find_files function and print the number of found files
-    cwps_train, lwps_train = find_files(city_folder_name, "train")
-    cwps_val, lwps_val = find_files(city_folder_name, "val")
-    cwps_pred, lwps_pred = find_files(city_folder_name, "pred")
+    cwps_train, lwps_train = find_files(preprocessed_input, "train")
+    cwps_val, lwps_val = find_files(preprocessed_input, "val")
+    cwps_pred, lwps_pred = find_files(preprocessed_input, "pred")
 
     print('Found {} chip files'.format(len(cwps_train)+len(cwps_val)+len(cwps_pred)))
     # N = 2
@@ -72,8 +70,9 @@ def yolo_format(
     print(f'Test array size: {len(test_cwps)}\n')
 
     # Check if the YOLO folder exists, if not create labels, images, and folders
-    folder_name_for_yolodata_city=f'ramp_data_yolo/{city}'
-    yolodata_city_withpath=os.path.join('/content/drive/MyDrive/YOLO_test/data',folder_name_for_yolodata_city)
+    # folder_name_for_yolodata_city=f'ramp_data_yolo/{city}'
+    # yolodata_city_withpath=os.path.join('/content/drive/MyDrive/YOLO_test/data',folder_name_for_yolodata_city)
+    yolodata_city_withpath=preprocessed_input
     # folder_name_for_yolodata='ramp_data_yolo'
     print(f'Name for new Yolo folder that will be created: {yolodata_city_withpath}')
     if not os.path.exists(yolodata_city_withpath):
