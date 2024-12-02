@@ -204,7 +204,7 @@ def convert_coordinates(coordinates, geo_dict):
 
 
 
-def write_yolo_file(iwp, city_folder, folder_type, output_path, class_index=0):
+def write_yolo_file(iwp, folder, output_path, class_index=0):
     """
     Writes YOLO label file based on the given image with path and class index.
 
@@ -221,8 +221,8 @@ def write_yolo_file(iwp, city_folder, folder_type, output_path, class_index=0):
     lwp = iwp.replace(".tif", ".geojson").replace("chips", "labels")
 
     # Create the YOLO label filename with path from the chip filename with path
-    # ywp = os.path.join(output_path,'labels',folder, os.path.basename(iwp).replace(".tif", ".txt"))
-    ywp = os.path.join(output_path,city_folder,folder_type,'labels',os.path.basename(iwp).replace(".tif", ".txt"))
+    ywp = os.path.join(output_path,'labels',folder, os.path.basename(iwp).replace(".tif", ".txt"))
+    # ywp = os.path.join(output_path,'labels',os.path.basename(iwp).replace(".tif", ".txt"))
     # Create the YOLO label folder if it does not exist
     os.makedirs(os.path.dirname(ywp), exist_ok=True)
 
@@ -299,7 +299,8 @@ def convert_tif_to_jpg(cwp, folder, output_path, quality_level=100):
             os.path.join(output_path, "images", folder),
             cwp.split("/")[-1].replace(".tif", ".jpg"),
         )
-
+        # print(f'\nyolo jog writing path {jwp}')
+        
         # Create the output folder if it does not exist
         os.makedirs(os.path.dirname(jwp), exist_ok=True)
 
