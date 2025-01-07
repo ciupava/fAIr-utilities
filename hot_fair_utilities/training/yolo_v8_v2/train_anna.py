@@ -46,7 +46,7 @@ HYPERPARAM_CHANGES = {
     "nbs": 64,
     "plots": True,
     "cache": True,
-    "val": True,
+    "val": False,
     "save": True,
 }
 
@@ -90,8 +90,13 @@ def train(data, weights, epochs, batch_size, pc, output_path, dataset_yaml_path,
         **kwargs,
     )
 
-    # metrics = model.val(save_json=True, plots=True)
-    # print(model.val())
+    metrics = model.val(data=data_scn,save_json=True, plots=True)
+    print(f'- - - - - - - - - - - - \nEvaluation results: {metrics} \n- - - - - - - - - - - - ')
+    metrics = model.val()  # assumes `model` has been loaded
+    print(f'mAP50-95 {metrics.box.map}')  # mAP50-95
+    print(f'mAP50 {metrics.box.map50}')  # mAP50
+    print(f'mAP75 {metrics.box.map75}')  # mAP75
+    print(f'list of mAP50-95 for each category {metrics.box.maps}')  # list of mAP50-95 for each category
     compute_iou_chart_from_yolo_results(results_csv_path=os.path.join(output_path,"checkpoints", name,'results.csv'),results_output_chart_path=os.path.join(output_path,"checkpoints", name,'iou_chart.png'))
     
     output_model_path=os.path.join(os.path.join(output_path,"checkpoints"), name, "weights", "best.pt")
